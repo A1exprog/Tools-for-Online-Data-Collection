@@ -1,0 +1,45 @@
+{
+    "coord": {
+        "lon": 56.2855,
+        "lat": 58.0174
+    },
+    "weather": [
+        {
+            "id": 801,
+            "main": "Clouds",
+            "description": "небольшая облачность",
+            "icon": "02d"
+        }
+    ],
+    "base": "stations",
+    "main": {
+        "temp": 16.7,
+        "feels_like": 15.97,
+        "temp_min": 16.7,
+        "temp_max": 16.7,
+        "pressure": 1019,
+        "humidity": 59,
+        "sea_level": 1019,
+        "grnd_level": 1002
+    },
+    "visibility": 10000,
+    "wind": {
+        "speed": 2,
+        "deg": 140
+    },
+    "clouds": {
+        "all": 13
+    },
+    "dt": 1789049401,
+    "sys": {
+        "type": 1,
+        "id": 8984,
+        "country": "RU",
+        "sunrise": 1789004003,
+        "sunset": 1789051855
+    },
+    "timezone": 18000,
+    "id": 511196,
+    "name": "Пермь",
+    "cod": 200
+}

@@ -1,0 +1,130 @@
+{
+  "name": "bookshop_parsing",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e1bfb694-0313-4674-ae2d-0b6c4f0b5457",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://books.toscrape.com/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "5b3f80b6-5614-4f6c-ad3e-92ddce519387",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "binaryPropertyName": "data_book",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "a640ad56-37f0-42cc-8c8a-62e7b773215f",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "title",
+              "cssSelector": "article.product_pod h3 a",
+              "returnValue": "attribute",
+              "attribute": "title",
+              "returnArray": true
+            },
+            {
+              "key": "image_url",
+              "cssSelector": "article.product_pod div.image_container img",
+              "returnValue": "attribute",
+              "attribute": "src",
+              "returnArray": true
+            },
+            {
+              "key": "price",
+              "cssSelector": "article.product_pod p.price_color",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "b84af497-559a-4db4-8558-5e9da79a49fe",
+      "name": "HTML"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "45ddbb18-1f77-42d2-b2a4-be7513a10db1",
+  "meta": {
+    "instanceId": "256523062f2ecee30dc0aeec07fd096033040c094802feedd3862a443ae4b641"
+  },
+  "nodeGroups": [],
+  "id": "AnnRphHzGkJ1AKfx",
+  "tags": []
+}
