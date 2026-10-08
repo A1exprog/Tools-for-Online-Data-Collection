@@ -1,0 +1,303 @@
+{
+  "name": "lab_3_API",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "611b8427-a70e-4086-9fd1-7784fd643aff",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://dummyjson.com/posts",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "20"
+            },
+            {
+              "name": "skip",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {
+          "pagination": {
+            "pagination": {
+              "paginationMode": "off"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "31d9db48-9f09-4cdc-8203-331e3f41d700",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "posts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "5e26c238-4a05-43b8-b1a6-35e84ffd2a17",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3648028c-a043-41a7-ae60-f1f6dea353a6",
+              "name": "post_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "99083a3f-cfb5-4971-ae18-8bfa4a7f9e53",
+              "name": "author_id",
+              "value": "={{ $json.userId }}",
+              "type": "string"
+            },
+            {
+              "id": "15a59864-8f6d-4b16-9336-086a43398a2b",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "aec2735f-dd86-47bb-8487-5b45218bfd73",
+              "name": "body",
+              "value": "={{ $json.body }}",
+              "type": "string"
+            },
+            {
+              "id": "4c610ed0-73dc-48cb-a674-e3f5b4142557",
+              "name": "likes",
+              "value": "={{ $json.reactions.likes }}",
+              "type": "string"
+            },
+            {
+              "id": "6419fff1-50ee-4bc0-8579-64cd0df79804",
+              "name": "dislikes",
+              "value": "={{ $json.reactions.dislikes }}",
+              "type": "string"
+            },
+            {
+              "id": "c47b62a4-c793-4085-95d5-62fd7ddcdfd1",
+              "name": "total_reactions",
+              "value": "={{ $json.reactions.likes + $json.reactions.dislikes }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        0
+      ],
+      "id": "12ce6b79-cc9a-486a-8256-ec510332aa2c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1kITSg9WH0U--b7m-gvEbdZmmVZh1YX07JsJDyHTeWYA",
+          "mode": "list",
+          "cachedResultName": "n8n_docs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kITSg9WH0U--b7m-gvEbdZmmVZh1YX07JsJDyHTeWYA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Лист1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1kITSg9WH0U--b7m-gvEbdZmmVZh1YX07JsJDyHTeWYA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "author_id",
+              "displayName": "author_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "body",
+              "displayName": "body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "likes",
+              "displayName": "likes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "dislikes",
+              "displayName": "dislikes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "total_reactions",
+              "displayName": "total_reactions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        896,
+        0
+      ],
+      "id": "d720d687-b8a8-4b51-9731-730790fbd38d",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ZG55Iaf98I5ZOotd",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "18dbec62-37d1-4706-92f0-eb092cc6aee3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "256523062f2ecee30dc0aeec07fd096033040c094802feedd3862a443ae4b641"
+  },
+  "nodeGroups": [],
+  "id": "RwoE4LKLXLtDURv9",
+  "tags": []
+}
