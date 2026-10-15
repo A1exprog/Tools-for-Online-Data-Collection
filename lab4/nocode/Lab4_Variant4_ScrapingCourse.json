@@ -1,0 +1,321 @@
+{
+  "name": "Lab4_Variant4_ScrapingCourse",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "0c89c54f-329d-4ebb-affa-29ef58b672eb",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.scrapingcourse.com/ecommerce/wp-json/wc/store/v1/products",
+        "options": {}
+      },
+      "id": "4995ae90-d481-4dc4-b83c-80de13093950",
+      "name": "WooCommerce API (Page 1)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1840,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.scrapingcourse.com/ecommerce/wp-json/wc/store/v1/products",
+        "options": {}
+      },
+      "id": "c9040177-c988-4cb5-b0d7-751de530c4db",
+      "name": "WooCommerce API (Page 2)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1840,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.scrapingcourse.com/ajax/products/json",
+        "options": {}
+      },
+      "id": "7d0b2cb7-ce3a-4cee-89e9-a66ec86945c0",
+      "name": "XHR Fallback API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1840,
+        48
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "4d1e5299-32ef-4296-9de2-660d4ae154bc",
+      "name": "Merge All Sources",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2096,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Нормализация данных под формат CSV\nreturn $input.all().map(item => {\n  const data = item.json;\n  \n  // Цена в WooCommerce хранится в копейках (например, 6900), делим на 100\n  let price = '';\n  if (data.prices && data.prices.price) {\n    price = (parseFloat(data.prices.price) / 100).toFixed(2);\n  } else if (data.sale_price || data.regular_price) {\n    // Fallback для XHR источника\n    price = String(data.sale_price || data.regular_price).replace(/[^0-9.]/g, '');\n  }\n\n  // Извлечение первой картинки\n  let image = '';\n  if (data.images && Array.isArray(data.images)) {\n    image = data.images[0].src || '';\n  } else if (typeof data.images === 'string') {\n    image = data.images.split(',')[0].trim();\n  }\n\n  return {\n    json: {\n      name: (data.name || '').trim(),\n      sku: data.sku || '',\n      price: price,\n      link: data.permalink || `https://www.scrapingcourse.com/ecommerce/product/${(data.name || '').toLowerCase().replace(/\\s+/g, '-')}`,\n      image: image,\n      source: data.prices ? 'woocommerce_api' : 'xhr_api'\n    }\n  };\n});"
+      },
+      "id": "e4e53db5-a903-41da-9854-58c9b711d755",
+      "name": "Normalize & Format",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2352,
+        -112
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "dba16f11-614c-4619-bfba-607550608063",
+      "name": "Remove Duplicates",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 1,
+      "position": [
+        2592,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "maxItems": 250
+      },
+      "id": "0894c5d0-51f8-4e8e-b51b-89a7dfceb849",
+      "name": "Limit to 250",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        2848,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "toFile",
+        "fileFormat": "csv",
+        "options": {}
+      },
+      "id": "5a809ddf-7ead-48c7-a4af-f31cb719fabb",
+      "name": "Convert to CSV",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 1,
+      "position": [
+        3104,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "fileName": "nocode_result.csv",
+        "options": {}
+      },
+      "id": "f83e3150-c402-4eb3-857b-d1f8ad7eb0d4",
+      "name": "Save to Disk",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        3344,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json['statusCode']}}",
+              "operation": "notEqual",
+              "value2": 200
+            }
+          ]
+        }
+      },
+      "id": "9e5848b3-5fb8-4219-946b-8c3662e047c2",
+      "name": "Check for Errors",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        2496,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Логирование ошибки\nconst errorData = $input.all().map(item => ({\n  json: {\n    error: 'HTTP request failed',\n    status: item.json.statusCode,\n    timestamp: new Date().toISOString()\n  }\n}));\n\nreturn errorData;"
+      },
+      "id": "ca0b3925-18d3-4bf7-84d9-8d3566748c91",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2752,
+        96
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "WooCommerce API (Page 1)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "WooCommerce API (Page 2)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "XHR Fallback API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WooCommerce API (Page 1)": {
+      "main": [
+        [
+          {
+            "node": "Merge All Sources",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check for Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WooCommerce API (Page 2)": {
+      "main": [
+        [
+          {
+            "node": "Merge All Sources",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Check for Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XHR Fallback API": {
+      "main": [
+        [
+          {
+            "node": "Check for Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Sources": {
+      "main": [
+        [
+          {
+            "node": "Normalize & Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize & Format": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Limit to 250",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit to 250": {
+      "main": [
+        [
+          {
+            "node": "Convert to CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to CSV": {
+      "main": [
+        [
+          {
+            "node": "Save to Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for Errors": {
+      "main": [
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge All Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "45f23bf5-751d-46b7-b705-e7ff8023d1fe",
+  "meta": {
+    "instanceId": "05d3fd2728f76cf3d4798bc0093d263990ce9b76120a58d9637ffb1073b815e7"
+  },
+  "nodeGroups": [],
+  "id": "mpsDiPG40DMkDohH",
+  "tags": []
+}
