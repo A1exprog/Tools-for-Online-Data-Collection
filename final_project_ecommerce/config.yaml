@@ -1,0 +1,155 @@
+# =====================================================================
+#  Итоговый проект: гибридный пайплайн сбора данных
+#  Вопрос: как соотносятся цены и ассортимент двух учебных магазинов
+#  (scrapingcourse.com — HTML, DummyJSON — REST API) в сопоставимых
+#  товарных группах и связаны ли цена/скидка с рейтингом и отзывами?
+# =====================================================================
+
+project:
+  name: "ecommerce-hybrid-pipeline"
+  parser_version: "1.1.0"   # 1.1.0: наличие вариативных товаров по вариациям
+
+# ---------- Общие параметры HTTP (вежливость) ----------
+http:
+  # Честный User-Agent с контактом (ОБЯЗАТЕЛЬНО замени e-mail на свой)
+  user_agent: "EduScraper/1.0 (+educational final project; contact: ax1sproger@gmail.com)"
+  timeout_sec: 20
+  max_retries: 3                 # повторы только для временных ошибок
+  backoff_base_sec: 1.0          # экспоненциальная пауза: base * 2^attempt + джиттер
+  max_retry_after_sec: 120       # верхняя граница ожидания по Retry-After
+  accept_gzip: true              # Accept-Encoding: gzip, deflate (снижение трафика)
+  respect_robots: true           # robots.txt по RFC 9309: Disallow/Allow с * и $, Crawl-delay
+  # Явные исключения из robots.txt. Каждое — осознанное решение с обоснованием;
+  # применение пишется в лог (robots_exception_applied) и в отчёт о прогоне.
+  robots_exceptions:
+    - url_prefix: "https://www.scrapingcourse.com/ecommerce/"
+      robots_rule: "User-agent: * / Disallow: /ecommerce/*"
+      reason: >
+        scrapingcourse.com — учебная площадка, созданная для отработки скрейпинга;
+        раздел /ecommerce/ прямо указан в списке разрешённых источников курса
+        («Источники данных для итогового проекта», раздел 1). Сбор щадящий:
+        ≤ 1 запрос/с, ~200 запросов в первом прогоне, ~20 в повторных.
+      approved_by: "список площадок курса; подтвердить у преподавателя до защиты"
+  circuit_breaker:
+    failure_threshold: 5         # подряд неудачных запросов к домену -> OPEN
+    cooldown_sec: 60             # сколько домен «отдыхает» до HALF_OPEN
+  debug_cache:
+    enabled: false               # включается флагом --debug-cache (только для отладки)
+    dir: ".cache/http"
+    ttl_sec: 86400
+
+# ---------- Источники ----------
+sources:
+  html:
+    name: "scrapingcourse.com"
+    type: "html"
+    base_url: "https://www.scrapingcourse.com/ecommerce/"
+    pagination: "a.next.page-numbers (rel=next) -> /ecommerce/page/N/"
+    max_pages: 30                # предохранитель от бесконечной пагинации
+    rate_limit_sec: 1.0          # минимум 1 сек между запросами к домену
+    jitter_sec: 0.5              # + случайная добавка 0..0.5 сек
+    collect_details: true        # заходить в карточки товаров (категории, SKU, наличие)
+    detail_refresh_days: 7       # карточку без изменений перезапрашиваем не чаще раза в неделю
+    sitemap_candidates:          # где искать sitemap (плюс строки Sitemap: из robots.txt)
+      - "https://www.scrapingcourse.com/ecommerce/wp-sitemap.xml"
+      - "https://www.scrapingcourse.com/ecommerce/sitemap.xml"
+      - "https://www.scrapingcourse.com/ecommerce/product-sitemap.xml"
+
+  api:
+    name: "dummyjson.com"
+    type: "rest_api"
+    base_url: "https://dummyjson.com/products"
+    page_size: 50                # limit/skip-пагинация
+    rate_limit_sec: 0.5
+    jitter_sec: 0.3
+    select: "id,title,description,category,brand,price,discountPercentage,rating,stock,availabilityStatus,sku,tags,minimumOrderQuantity,reviews,meta"
+    # Персональные данные (reviewerName, reviewerEmail) отбрасываются ещё при сборе
+    drop_review_fields: ["reviewerName", "reviewerEmail"]
+
+# ---------- Связь источников: единые товарные группы ----------
+# HTML: группа определяется правилами по категориям карточки + названию товара
+# API:  группа определяется по slug категории DummyJSON
+linkage:
+  html_keyword_rules:            # порядок важен: первое совпадение побеждает
+    bags:      ["bag", "bags", "backpack", "duffle", "tote", "messenger"]
+    watches:   ["watch", "watches"]
+    fitness:   ["fitness", "equipment", "yoga", "strap", "band", "ball", "bottle", "rope", "kettlebell", "dumbbell", "roller", "sprite", "gear"]
+    outerwear: ["jacket", "jackets", "coat", "windbreaker", "shell", "parka"]
+    bottoms:   ["pant", "pants", "short", "shorts", "legging", "leggings", "tights", "capri", "bottoms"]
+    tops:      ["hoodie", "hoodies", "sweatshirt", "sweatshirts", "tee", "tees", "shirt", "tank", "tanks", "bra", "bras", "top", "tops", "pullover", "sweater", "jersey"]
+    shoes:     ["shoe", "shoes", "sneaker", "sneakers", "boot", "boots"]
+  api_category_map:
+    mens-shirts: tops
+    tops: tops
+    womens-bags: bags
+    mens-watches: watches
+    womens-watches: watches
+    sports-accessories: fitness
+    mens-shoes: shoes
+    womens-shoes: shoes
+    womens-dresses: dresses
+  default_group: "other"
+
+# ---------- Хранилище ----------
+storage:
+  db_path: "db/warehouse.db"
+  schema_path: "db/schema.sql"
+  raw_dir: "raw"                 # JSON Lines, только дозапись
+  clean_dir: "clean"             # Parquet + rejects.jsonl
+  mart_dir: "mart"               # представления (CSV + Parquet)
+  logs_dir: "logs"               # run_<id>.jsonl
+  reports_dir: "reports"         # run_report_<id>.json, quality_<id>.json, alerts_<id>.json
+  state_dir: "state"             # etags.json, watermark.json, checkpoint.json
+
+# ---------- Метрики качества: пороги WARN / CRITICAL ----------
+# direction: min -> значение должно быть >= порога; max -> <= порога
+quality:
+  products_count:          {direction: min, warn: 350, critical: 300}
+  min_products_per_source: {direction: min, warn: 150, critical: 100}
+  reviews_count:           {direction: min, warn: 400, critical: 300}
+  reject_rate_pct:         {direction: max, warn: 2.0,  critical: 10.0}
+  duplicate_key_pct:       {direction: max, warn: 0.5,  critical: 2.0}
+  missing_category_pct:    {direction: max, warn: 5.0,  critical: 20.0}
+  html_unmapped_group_pct: {direction: max, warn: 15.0, critical: 40.0}
+  price_outlier_pct:       {direction: max, warn: 3.0,  critical: 10.0}
+  orphan_reviews_pct:      {direction: max, warn: 0.0,  critical: 0.0}
+  group_overlap_count:     {direction: min, warn: 3,    critical: 1}
+  missing_api_rating_pct:  {direction: max, warn: 1.0,  critical: 5.0}
+
+pipeline:
+  fail_on_red_quality: true      # RED -> в БД и mart ничего не публикуется, exit code 3
+
+# ---------- Пороги оповещения ----------
+alerts:
+  volume_drop_vs_previous_pct: 20     # товаров стало меньше, чем в прошлом прогоне, более чем на 20 %
+  error_rate_warn: 0.05               # доля 4xx/5xx/сетевых ошибок
+  error_rate_critical: 0.20
+  p95_latency_ms: 3000
+  max_retries: 20
+  # + всегда: source_failed, circuit_open, quality_red (critical)
+
+# ---------- Режим работы ----------
+schedule:
+  frequency: "daily"
+  cron: "0 6 * * *"                   # 06:00 по времени сервера n8n
+  mechanism: "n8n Schedule Trigger -> Execute Command -> IF -> Telegram"
+  reason: >
+    Учебные каталоги меняются редко, поэтому ежедневного запуска достаточно,
+    чтобы заметить изменения цен/наличия и деградацию источников. Повторные
+    прогоны дешёвые: условные запросы (304) и водяные знаки отсекают
+    неизменённые страницы, поэтому типичный ежедневный прогон делает
+    ~20 лёгких запросов вместо ~200.
+
+# ---------- Демонстрация устойчивости ----------
+demo:
+  failure_url: "https://httpbin.org/status/503"
+
+# ---------- Правовые параметры ----------
+legal:
+  contact_email: "ax1sproger@gmail.com"
+  pii_collected: false                 # reviewerName/reviewerEmail не сохраняются
+  retention_raw_days: 90
+  retention_clean_days: 365
+  legal_basis: "учебные площадки, созданные для отработки сбора данных; образовательная цель"
+  robots_txt_respected: "да, с одним задокументированным исключением (http.robots_exceptions)"
+  captcha_bypass: false
