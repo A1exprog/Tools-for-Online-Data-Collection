@@ -1,0 +1,141 @@
+2026-10-31 22:42:23 [scrapy.utils.log] INFO: Scrapy 2.13.3 started (bot: lab5_quotes)
+2026-10-31 22:42:23 [scrapy.utils.log] INFO: Versions:
+{'lxml': '6.1.3',
+ 'libxml2': '2.14.6',
+ 'cssselect': '1.3.0',
+ 'parsel': '1.10.0',
+ 'w3lib': '2.3.1',
+ 'Twisted': '25.5.0',
+ 'Python': '3.13.17 (main, Oct 21 2026, 17:48:31) [Clang 23.1.3 ]',
+ 'pyOpenSSL': '26.4.0 (OpenSSL 4.0.2 25 Aug 2026)',
+ 'cryptography': '50.0.1',
+ 'Platform': 'Linux-6.18.44-fc-v185-x86_64-with-glibc2.39'}
+2026-10-31 22:42:23 [scrapy.addons] INFO: Enabled addons:
+[]
+2026-10-31 22:42:23 [scrapy.extensions.telnet] INFO: Telnet Password: 4d1c5f49af25bd8b
+2026-10-31 22:42:23 [scrapy.middleware] INFO: Enabled extensions:
+['scrapy.extensions.corestats.CoreStats',
+ 'scrapy.extensions.telnet.TelnetConsole',
+ 'scrapy.extensions.memusage.MemoryUsage',
+ 'scrapy.extensions.closespider.CloseSpider',
+ 'scrapy.extensions.logstats.LogStats',
+ 'scrapy.extensions.throttle.AutoThrottle']
+2026-10-31 22:42:23 [scrapy.crawler] INFO: Overridden settings:
+{'AUTOTHROTTLE_ENABLED': True,
+ 'AUTOTHROTTLE_MAX_DELAY': 10.0,
+ 'AUTOTHROTTLE_START_DELAY': 1.0,
+ 'AUTOTHROTTLE_TARGET_CONCURRENCY': 2.0,
+ 'BOT_NAME': 'lab5_quotes',
+ 'CLOSESPIDER_ERRORCOUNT': 20,
+ 'CLOSESPIDER_ITEMCOUNT': 400,
+ 'CLOSESPIDER_PAGECOUNT': 300,
+ 'CLOSESPIDER_TIMEOUT': 1200,
+ 'CONCURRENT_REQUESTS_PER_DOMAIN': 4,
+ 'DEPTH_LIMIT': 15,
+ 'DEPTH_STATS_VERBOSE': True,
+ 'DOWNLOAD_DELAY': 1.0,
+ 'DOWNLOAD_TIMEOUT': 30,
+ 'FEED_EXPORT_ENCODING': 'utf-8',
+ 'HTTPCACHE_ENABLED': 'True',
+ 'HTTPCACHE_IGNORE_HTTP_CODES': [500, 502, 503, 504, 408, 429],
+ 'LOG_FILE': 'logs/run4_cache_cold.log',
+ 'LOG_LEVEL': 'INFO',
+ 'NEWSPIDER_MODULE': 'lab5_quotes.spiders',
+ 'RETRY_HTTP_CODES': [500, 502, 503, 504, 408, 429],
+ 'ROBOTSTXT_OBEY': True,
+ 'SPIDER_MODULES': ['lab5_quotes.spiders'],
+ 'USER_AGENT': 'EducationalCrawler/1.0 (+https://example.edu; contact: '
+               'student@example.edu)'}
+2026-10-31 22:42:23 [scrapy.middleware] INFO: Enabled downloader middlewares:
+['scrapy.downloadermiddlewares.offsite.OffsiteMiddleware',
+ 'scrapy.downloadermiddlewares.robotstxt.RobotsTxtMiddleware',
+ 'scrapy.downloadermiddlewares.httpauth.HttpAuthMiddleware',
+ 'scrapy.downloadermiddlewares.downloadtimeout.DownloadTimeoutMiddleware',
+ 'scrapy.downloadermiddlewares.defaultheaders.DefaultHeadersMiddleware',
+ 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware',
+ 'scrapy.downloadermiddlewares.retry.RetryMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.MetaRefreshMiddleware',
+ 'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware',
+ 'scrapy.downloadermiddlewares.redirect.RedirectMiddleware',
+ 'scrapy.downloadermiddlewares.cookies.CookiesMiddleware',
+ 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware',
+ 'scrapy.downloadermiddlewares.stats.DownloaderStats',
+ 'scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware']
+2026-10-31 22:42:23 [scrapy.middleware] INFO: Enabled spider middlewares:
+['scrapy.spidermiddlewares.start.StartSpiderMiddleware',
+ 'scrapy.spidermiddlewares.httperror.HttpErrorMiddleware',
+ 'scrapy.spidermiddlewares.referer.RefererMiddleware',
+ 'scrapy.spidermiddlewares.urllength.UrlLengthMiddleware',
+ 'scrapy.spidermiddlewares.depth.DepthMiddleware']
+2026-10-31 22:42:23 [scrapy.middleware] INFO: Enabled item pipelines:
+['lab5_quotes.pipelines.ValidatePipeline',
+ 'lab5_quotes.pipelines.CleanPipeline',
+ 'lab5_quotes.pipelines.DuplicateFilterPipeline',
+ 'lab5_quotes.pipelines.SQLitePipeline']
+2026-10-31 22:42:23 [scrapy.core.engine] INFO: Spider opened
+2026-10-31 22:42:23 [scrapy.extensions.logstats] INFO: Crawled 0 pages (at 0 pages/min), scraped 0 items (at 0 items/min)
+2026-10-31 22:42:23 [scrapy.extensions.telnet] INFO: Telnet console listening on 127.0.0.1:6023
+2026-10-31 22:43:23 [scrapy.extensions.logstats] INFO: Crawled 48 pages (at 48 pages/min), scraped 51 items (at 51 items/min)
+2026-10-31 22:44:23 [scrapy.extensions.logstats] INFO: Crawled 98 pages (at 50 pages/min), scraped 105 items (at 54 items/min)
+2026-10-31 22:45:23 [scrapy.extensions.logstats] INFO: Crawled 150 pages (at 52 pages/min), scraped 155 items (at 50 items/min)
+2026-10-31 22:46:23 [scrapy.extensions.logstats] INFO: Crawled 198 pages (at 48 pages/min), scraped 274 items (at 119 items/min)
+2026-10-31 22:46:27 [scrapy.core.engine] INFO: Closing spider (finished)
+2026-10-31 22:46:27 [tags] INFO: Stats saved to data/stats_4.json
+2026-10-31 22:46:27 [scrapy.statscollectors] INFO: Dumping Scrapy stats:
+{'clean/authors': 49,
+ 'clean/dates_to_iso': 49,
+ 'clean/quotes': 232,
+ 'downloader/request_bytes': 63145,
+ 'downloader/request_count': 202,
+ 'downloader/request_method_count/GET': 202,
+ 'downloader/response_bytes': 937277,
+ 'downloader/response_count': 202,
+ 'downloader/response_status_count/200': 201,
+ 'downloader/response_status_count/404': 1,
+ 'dupefilter/filtered': 378,
+ 'elapsed_time_seconds': 243.869531,
+ 'finish_reason': 'finished',
+ 'finish_time': datetime.datetime(2026, 10, 31, 17, 46, 27, 815741, tzinfo=datetime.timezone.utc),
+ 'httpcache/firsthand': 202,
+ 'httpcache/miss': 202,
+ 'httpcache/store': 202,
+ 'item_scraped_count': 281,
+ 'items_per_minute': 69.38271604938272,
+ 'log_count/INFO': 15,
+ 'memusage/max': 77676544,
+ 'memusage/startup': 73867264,
+ 'pages/author': 49,
+ 'pages/list': 10,
+ 'pages/tag': 142,
+ 'pipeline/sqlite_batches': 6,
+ 'pipeline/sqlite_written': 281,
+ 'pipeline/sqlite_written/author': 49,
+ 'pipeline/sqlite_written/quote': 232,
+ 'request_depth_count/0': 1,
+ 'request_depth_count/1': 41,
+ 'request_depth_count/10': 43,
+ 'request_depth_count/11': 7,
+ 'request_depth_count/2': 150,
+ 'request_depth_count/3': 62,
+ 'request_depth_count/4': 48,
+ 'request_depth_count/5': 46,
+ 'request_depth_count/6': 38,
+ 'request_depth_count/7': 36,
+ 'request_depth_count/8': 59,
+ 'request_depth_count/9': 48,
+ 'request_depth_max': 11,
+ 'response_received_count': 202,
+ 'responses_per_minute': 49.876543209876544,
+ 'robotstxt/request_count': 1,
+ 'robotstxt/response_count': 1,
+ 'robotstxt/response_status_count/404': 1,
+ 'scheduler/dequeued': 201,
+ 'scheduler/dequeued/memory': 201,
+ 'scheduler/enqueued': 201,
+ 'scheduler/enqueued/memory': 201,
+ 'start_time': datetime.datetime(2026, 10, 31, 17, 42, 23, 946210, tzinfo=datetime.timezone.utc),
+ 'tags/found_via_list': 232,
+ 'tags/found_via_top10': 100,
+ 'validate/passed/author': 49,
+ 'validate/passed/quote': 232}
+2026-10-31 22:46:27 [scrapy.core.engine] INFO: Spider closed (finished)

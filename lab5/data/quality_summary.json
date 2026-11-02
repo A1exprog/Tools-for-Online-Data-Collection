@@ -1,0 +1,15 @@
+{
+  "total": 232,
+  "authors": 49,
+  "empty_required": 0,
+  "empty_required_ratio": 0.0,
+  "empty_by_field": {
+    "quote": 0,
+    "author": 0,
+    "source_tag": 0,
+    "author_url": 0,
+    "author_born_date": 0,
+    "author_born_place": 0,
+    "author_bio": 0
+  }
+}

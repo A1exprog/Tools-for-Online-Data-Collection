@@ -1,0 +1,1031 @@
+{
+  "name": "lb5",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://quotes.toscrape.com/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -2048,
+        256
+      ],
+      "id": "23c11994-ba3e-44e2-bc20-1052e250d2e9",
+      "name": "HTTP Request",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -2400,
+        256
+      ],
+      "id": "eae8e568-9bb0-41b6-af27-38391f445afa",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "tags",
+              "cssSelector": "div.tags-box a.tag",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {
+          "trimValues": true,
+          "cleanUpText": true
+        }
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -1824,
+        256
+      ],
+      "id": "ff377f84-6641-40c4-b642-e822c59290ea",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "tags",
+        "options": {
+          "disableDotNotation": false
+        }
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1600,
+        256
+      ],
+      "id": "b2d16c71-b907-4827-a8ae-ba60e7ab2bba",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "148aad71-0148-487b-ad17-b70292b0e30a",
+              "name": "tag_url",
+              "value": "=https://quotes.toscrape.com{{ $json.tags }}",
+              "type": "string"
+            },
+            {
+              "id": "b2ce47c8-c5a6-4ed8-8d72-1ebf96bd359e",
+              "name": "source_tag",
+              "value": "={{ $json.tags.split('/')[2] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -1376,
+        256
+      ],
+      "id": "6f892574-fa52-4e7f-9e5d-0aadd6a6fd67",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1136,
+        256
+      ],
+      "id": "95bb61e6-c34f-407d-a063-9c3fb64ed3d3",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "options": {
+          "fileName": "nocode_export.csv",
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        -224
+      ],
+      "id": "217db6b7-4c91-4c86-beeb-a5ba69536a93",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/files/nocode_export.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        -224
+      ],
+      "id": "e8ac94be-e1d4-4e76-a286-9f38320332f2",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.tag_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -944,
+        368
+      ],
+      "id": "3a57fcc6-92af-4525-aa27-02568a959c1f",
+      "name": "HTTP Request1",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "quotes_html",
+              "cssSelector": "div.quote",
+              "returnValue": "html",
+              "returnArray": true
+            },
+            {
+              "key": "next_href",
+              "cssSelector": "li.next a",
+              "returnValue": "attribute",
+              "attribute": "href"
+            }
+          ]
+        },
+        "options": {
+          "trimValues": false,
+          "cleanUpText": false
+        }
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -736,
+        416
+      ],
+      "id": "1f848b7c-ac8a-48fe-a61a-56c3206aa799",
+      "name": "HTML1",
+      "alwaysOutputData": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -448,
+        -48
+      ],
+      "id": "bef1ec08-98f0-42bb-a3d2-01e4f14202c1",
+      "name": "Loop Over Items1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "html",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "quote",
+              "cssSelector": "span.text"
+            },
+            {
+              "key": "author",
+              "cssSelector": "small.author"
+            },
+            {
+              "key": "authorUrl",
+              "cssSelector": "span small.author + a",
+              "returnValue": "attribute",
+              "attribute": "href"
+            },
+            {
+              "key": "tags",
+              "cssSelector": "div.tags a.tag",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {
+          "trimValues": false,
+          "cleanUpText": false
+        }
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        64
+      ],
+      "id": "64825f89-f872-4f5f-b13a-3cb5b9b1f370",
+      "name": "HTML2",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f702cd7e-23b9-4f7a-b1c3-c12836787577",
+              "name": "quote",
+              "value": "={{ $json.quote }}",
+              "type": "string"
+            },
+            {
+              "id": "ceb1161f-424d-4978-ab85-9d1ecbbd7b7b",
+              "name": "author",
+              "value": "={{ $json.author }}",
+              "type": "string"
+            },
+            {
+              "id": "19776224-df54-4b85-9f84-42b5e80cf367",
+              "name": "authorUrl",
+              "value": "=https://quotes.toscrape.com{{ $json.authorUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "b3d78208-e298-48cf-b329-f00291683c9e",
+              "name": "tags",
+              "value": "={{ $json.tags }}",
+              "type": "array"
+            },
+            {
+              "id": "85229d19-9e02-4338-b9af-80e9d79991f0",
+              "name": "source_tag",
+              "value": "={{ $('Loop Over Items1').item.json.source_tag }}",
+              "type": "string"
+            },
+            {
+              "id": "b39b6417-24bb-4ab7-a53f-4bee8d27189e",
+              "name": "business_key",
+              "value": "={{ $json.author.toLowerCase() + '|' + $json.quote.toLowerCase() + '|' + $('Loop Over Items1').item.json.source_tag }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        208,
+        64
+      ],
+      "id": "34c586dc-b746-432b-a003-19af4ec5a57d",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.authorUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        432,
+        64
+      ],
+      "id": "f062db43-8316-4d25-a449-d2bc94431a28",
+      "name": "HTTP Request2",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "bornDate",
+              "cssSelector": "span.author-born-date"
+            },
+            {
+              "key": "bornPlace",
+              "cssSelector": "span.author-born-location"
+            },
+            {
+              "key": "authorBio",
+              "cssSelector": "div.author-description"
+            }
+          ]
+        },
+        "options": {
+          "trimValues": true,
+          "cleanUpText": true
+        }
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        656,
+        64
+      ],
+      "id": "dbc3e736-e930-4420-aef3-dbcd2aeed8c3",
+      "name": "HTML3",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f92ffdb4-68fb-4330-b636-45f3c5e4b89d",
+              "name": "business_key",
+              "value": "={{ $('Edit Fields2').item.json.business_key }}",
+              "type": "string"
+            },
+            {
+              "id": "fa524f05-b13b-4b8e-ae05-fcd5fce7b664",
+              "name": "quote",
+              "value": "={{ $('Edit Fields2').item.json.quote }}",
+              "type": "string"
+            },
+            {
+              "id": "b0745968-6eb7-452e-a155-c164853f1ed5",
+              "name": "author",
+              "value": "={{ $('Edit Fields2').item.json.author }}",
+              "type": "string"
+            },
+            {
+              "id": "9e359c04-9084-4183-bb0a-9ea9b763052e",
+              "name": "tags",
+              "value": "={{ $('Edit Fields2').item.json.tags }}",
+              "type": "array"
+            },
+            {
+              "id": "b3a4adbb-1b22-4e0b-8057-01be1e8cbe7b",
+              "name": "source_tag",
+              "value": "={{ $('Edit Fields2').item.json.source_tag }}",
+              "type": "string"
+            },
+            {
+              "id": "cd8821dd-45bf-4837-86e5-b17705b74e09",
+              "name": "author_born_date",
+              "value": "={{ $json.bornDate }}",
+              "type": "string"
+            },
+            {
+              "id": "ca4ce790-0f10-4791-a1a3-57d98cd7674e",
+              "name": "author_born_place",
+              "value": "={{ $json.bornPlace }}",
+              "type": "string"
+            },
+            {
+              "id": "8d10fdb9-934a-46cd-81cd-4f96b109bae9",
+              "name": "author_bio",
+              "value": "={{ $json.authorBio }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        896,
+        64
+      ],
+      "id": "7213b4da-8cb4-4906-b53d-e0720a885c76",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4208d4c8-692b-4db4-b266-7cfc53a81f4f",
+              "leftValue": "={{ $json.business_key }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -64,
+        -224
+      ],
+      "id": "420b53b4-ff1d-40a7-9d55-59958a9339fb",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e8c2cd2-2be6-4b2b-a00b-316e53712e72",
+              "name": "quotes_html",
+              "value": "={{ $json.quotes_html }}",
+              "type": "array"
+            },
+            {
+              "id": "aa10e1c2-90de-4916-9b00-ecc4405fed52",
+              "name": "next_url",
+              "value": "={{ $json?.next_href ? 'https://quotes.toscrape.com' + $json.next_href : '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -528,
+        432
+      ],
+      "id": "68eacafc-a11d-4d63-a6b2-feed20917f9d",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9535ef45-d72f-40bb-802d-6cbc27bb1a95",
+              "leftValue": "={{ $json.next_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -64,
+        624
+      ],
+      "id": "6da0021e-509e-4318-bf30-8decac71db02",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.next_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        160,
+        592
+      ],
+      "id": "b8058aa5-7cbb-42a7-a809-19bbc8f092c0",
+      "name": "HTTP Request3",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "quotes_html",
+              "cssSelector": "div.quote",
+              "returnValue": "html",
+              "returnArray": true
+            },
+            {
+              "key": "next_href",
+              "cssSelector": "li.next a",
+              "returnValue": "=attribute"
+            }
+          ]
+        },
+        "options": {
+          "trimValues": false,
+          "cleanUpText": false
+        }
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        592
+      ],
+      "id": "89a87661-481e-4bd4-8cc8-56d268eb595d",
+      "name": "HTML4",
+      "alwaysOutputData": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e8c2cd2-2be6-4b2b-a00b-316e53712e72",
+              "name": "quotes_html",
+              "value": "={{ $json.quotes_html }}",
+              "type": "array"
+            },
+            {
+              "id": "aa10e1c2-90de-4916-9b00-ecc4405fed52",
+              "name": "next_url",
+              "value": "={{ $json?.next_href ? 'https://quotes.toscrape.com' + $json.next_href : '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        544,
+        592
+      ],
+      "id": "02f30213-db25-431d-bd83-54db7f5f60e0",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "jsCode": "$getWorkflowStaticData('global').collected = [];\n$getWorkflowStaticData('global').records = [];\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2224,
+        256
+      ],
+      "id": "8b1690af-33b0-46ea-b470-86fadeb25682",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sd = $getWorkflowStaticData('global');\nsd.collected = sd.collected || [];\n\nfor (const html of $input.first().json.quotes_html) {\n  sd.collected.push({\n    html,\n    source_tag: $('Loop Over Items').item.json.source_tag\n  });\n}\n\nreturn $('Edit Fields1').first();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -288,
+        432
+      ],
+      "id": "a1a1e0d4-a6d3-40df-af06-79508ddcc325",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sd = $getWorkflowStaticData('global');\nsd.collected = sd.collected || [];\n\nfor (const html of $input.first().json.quotes_html) {\n  sd.collected.push({\n    html,\n    source_tag: $('Loop Over Items').item.json.source_tag\n  });\n}\n\nreturn $('Edit Fields4').first();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        592
+      ],
+      "id": "c0498fd5-6b46-4abf-9df9-31e1993b6bbf",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const sd = $getWorkflowStaticData('global');\nconst collected = sd.collected || [];\n\nreturn collected.map(html => ({ json: { \n  html,\n} }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -880,
+        16
+      ],
+      "id": "1d0f8962-16fe-4204-8d79-9f52b7a7a00c",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "business_key",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        256,
+        -224
+      ],
+      "id": "cac0f84f-dae3-4bd3-a43e-4aee1a3709df",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "edb79433-e5c9-41fd-8533-60c335efb88d",
+              "name": "html",
+              "value": "={{ $json.html.html }}",
+              "type": "string"
+            },
+            {
+              "id": "248da151-86d6-4810-ae31-52712b62e65f",
+              "name": "source_tag",
+              "value": "={{ $json.html.source_tag }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -672,
+        -48
+      ],
+      "id": "8c301494-eac8-4b9b-95cd-d07e28e394d9",
+      "name": "Edit Fields5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTML1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTML2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "HTML3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "HTML4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML4": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "458e658a-5982-4627-81fa-50e4ef15724e",
+  "meta": {
+    "instanceId": "300e9d17519dcf9ad74a16c2f287755b1ba20ac7c961ba6af568e6d0dfe00f26"
+  },
+  "nodeGroups": [],
+  "id": "32Xvgx1shwpXKQtB",
+  "tags": []
+}
