@@ -1,0 +1,57 @@
+{
+  "run_id": "S5_retry_policy",
+  "started_at": "2026-11-02T15:57:59.796+00:00",
+  "duration_s": 57.52,
+  "requests": 14,
+  "status_codes": {
+    "200": 4,
+    "400": 1,
+    "401": 1,
+    "404": 1,
+    "429": 3,
+    "500": 4
+  },
+  "error_rate": 0.7143,
+  "share_429": 0.2143,
+  "share_403": 0.0,
+  "retries": 6,
+  "latency_median_ms": 8.0,
+  "latency_p95_ms": 524.8,
+  "bytes_wire": 10513,
+  "bytes_decoded": 10513,
+  "avg_response_bytes": 2590,
+  "not_modified": 0,
+  "breaker_activations": 0,
+  "breaker_skipped": 0,
+  "watermark_skipped": 0,
+  "fallbacks": 0,
+  "detector": {
+    "ok": 4
+  },
+  "incidents": 0,
+  "collected": 4,
+  "known": 0,
+  "discarded": 3,
+  "history_key": "S5_retry_policy",
+  "history": {
+    "status": "green",
+    "checks": [],
+    "note": "истории нет — сравнивать не с чем"
+  },
+  "collected_min": 4,
+  "alerts": [
+    {
+      "metric": "error_rate",
+      "level": "red",
+      "value": 0.7143,
+      "reason": "больше 10% запросов с ошибкой: источник деградирует или мы его перегружаем"
+    },
+    {
+      "metric": "share_429",
+      "level": "yellow",
+      "value": 0.2143,
+      "reason": "доля 429 выше 2%: подходим к лимиту сайта, нужно снизить скорость"
+    }
+  ],
+  "status": "red"
+}

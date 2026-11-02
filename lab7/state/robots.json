@@ -1,0 +1,35 @@
+{
+  "quotes.toscrape.com": {
+    "host": "quotes.toscrape.com",
+    "robots_url": "https://quotes.toscrape.com/robots.txt",
+    "status": 404,
+    "interpretation": "файла нет (404): по RFC 9309 ограничений нет, работаем по своим лимитам",
+    "can_fetch": {
+      "/js/page/1/": true,
+      "/api/quotes": true,
+      "/author/Albert-Einstein/": true,
+      "/tag/love/": true,
+      "/login": true
+    },
+    "crawl_delay": null,
+    "request_rate": null,
+    "sitemaps": null,
+    "raw_preview": null
+  },
+  "httpbin.org": {
+    "host": "httpbin.org",
+    "robots_url": "https://httpbin.org/robots.txt",
+    "status": 200,
+    "interpretation": "файл найден, правила применены",
+    "can_fetch": {
+      "/etag/lab7-a": true,
+      "/cache": true,
+      "/status/503": true,
+      "/delay/3": true
+    },
+    "crawl_delay": null,
+    "request_rate": null,
+    "sitemaps": null,
+    "raw_preview": "User-agent: *\nDisallow: /deny\n"
+  }
+}

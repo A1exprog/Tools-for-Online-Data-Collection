@@ -1,0 +1,13 @@
+{
+  "run_id": "S3_stub_pages",
+  "url": "http://localhost:8765/stub/captcha",
+  "status": 200,
+  "verdict": "блокировка",
+  "reasons": [
+    "маркеры: captcha, recaptcha",
+    "аномально малый ответ: 153 Б < 1500 Б",
+    "код 200, но нет ожидаемого элемента .quote"
+  ],
+  "headers": {},
+  "saved_at": "20261102T155522772610Z"
+}

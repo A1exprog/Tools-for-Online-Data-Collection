@@ -1,0 +1,6 @@
+{"run_id": "A", "history_key": "A", "started_at": "2026-11-02T15:40:31.622+00:00", "collected": 54, "known": 0, "avg_response_bytes": 2931, "requests": 27, "status": "green"}
+{"run_id": "B", "history_key": "B", "started_at": "2026-11-02T15:40:38.963+00:00", "collected": 54, "known": 0, "avg_response_bytes": 2931, "requests": 27, "status": "green"}
+{"run_id": "C_cold", "history_key": "C_cold", "started_at": "2026-11-02T15:41:38.575+00:00", "collected": 54, "known": 0, "avg_response_bytes": 2930, "requests": 27, "status": "green"}
+{"run_id": "C_warm", "history_key": "C_warm", "started_at": "2026-11-02T15:42:38.733+00:00", "collected": 4, "known": 18, "avg_response_bytes": 816, "requests": 5, "status": "green"}
+{"run_id": "S1_selector_timeout", "history_key": "S1_selector_timeout", "started_at": "2026-11-02T15:42:52.793+00:00", "collected": 10, "known": 0, "avg_response_bytes": 2860, "requests": 1, "status": "green"}
+{"run_id": "S2_browser_down", "history_key": "S2_browser_down", "started_at": "2026-11-02T15:42:53.820+00:00", "collected": 30, "known": 0, "avg_response_bytes": 3492, "requests": 3, "status": "green"}

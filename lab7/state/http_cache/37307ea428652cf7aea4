@@ -1,0 +1,12 @@
+{
+  "args": {},
+  "headers": {
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip",
+    "Host": "httpbin.org",
+    "User-Agent": "EducationalCrawler/1.0 (+https://example.edu; contact: student@example.edu)"
+  },
+  "method": "GET",
+  "origin": "217.217.228.134",
+  "url": "https://httpbin.org/etag/lab7-a"
+}

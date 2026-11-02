@@ -1,0 +1,65 @@
+# ЛР7, вариант 4 — браузерный сбор (Playwright), quotes.toscrape.com
+user_agent: "EducationalCrawler/1.0 (+https://example.edu; contact: student@example.edu)"
+
+sources:
+  quotes: "https://quotes.toscrape.com/"
+  httpbin: "https://httpbin.org/"
+
+# Один и тот же объём для прогонов A/B/C: 3 страницы /js/page/N/ в браузере + карточки их авторов
+# по HTTP + 4 ресурса httpbin с валидаторами. Всего ≈ 25–28 запросов (A ≤ 30 по заданию).
+workload:
+  pages: 3
+  page_path: "js/page/{n}/"
+  httpbin_paths: ["etag/lab7-a", "etag/lab7-b", "etag/lab7-c", "cache"]
+
+http_timeout: 10            # с: соединение + чтение
+
+limiter:
+  rate: 0.5                 # запросов/с на домен: интервал 2 с ≈ 2 × медианной латентности (~0,9 с)
+  burst: 2                  # допускаем 2 запроса подряд (страница + первый автор)
+  jitter: [0.2, 0.3]        # +20–30 % к паузе, чтобы не стучать ровным ритмом
+  per_domain:
+    httpbin.org: {rate: 1.0, burst: 2}
+
+adaptive:
+  k: 2.0                    # интервал ≥ 2 × EWMA латентности
+  alpha: 0.3                # вес нового замера в EWMA
+  backoff_factor: 2.0       # при 429/503 интервал ×2
+  max_interval: 30.0        # с
+
+retry:
+  max_attempts: 4           # всего попыток, включая первую
+  base: 1.0                 # с: 1, 2, 4… до cap, со случайным множителем (full jitter)
+  cap: 20.0                 # с: потолок одной задержки
+  retry_after_cap: 60.0     # Retry-After больше минуты — не ждём, сдаёмся
+  url_budget: 45.0          # с: общий бюджет на один URL со всеми повторами
+
+breaker:
+  threshold: 3              # 3 отказа подряд → open
+  cooldown: 15.0            # с паузы до пробного запроса
+
+detector:
+  min_size: 1500            # Б: нормальная страница цитат ≥ 5 КБ, карточка автора ≥ 3 КБ
+
+playwright:
+  channel: "chrome"         # установленный Google Chrome; если его нет — Chromium от Playwright
+  headless: true
+  nav_timeout_ms: 20000
+  selector_timeout_ms: 8000
+  max_attempts: 2           # для браузера: 1 повтор, дальше — деградация до HTTP-эндпоинта
+
+alerts:
+  error_rate_max: 0.10
+  share_429_max: 0.02
+  share_403_max: 0.0
+  latency_p95_max_ms: 3000
+  breaker_activations_max: 0
+  collected_min: 30
+
+profiles:
+  A: {label: "A. Наивный",                limiter: false, retry: false, breaker: false, detector: false,
+      conditional: false, gzip: false, watermark: false, block_assets: false}
+  B: {label: "B. Вежливый",               limiter: true,  retry: true,  breaker: true,  detector: true,
+      conditional: false, gzip: false, watermark: false, block_assets: false}
+  C: {label: "C. Вежливый + оптимизация", limiter: true,  retry: true,  breaker: true,  detector: true,
+      conditional: true,  gzip: true,  watermark: true,  block_assets: true}

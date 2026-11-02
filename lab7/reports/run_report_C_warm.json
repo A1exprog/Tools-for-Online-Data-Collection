@@ -1,0 +1,40 @@
+{
+  "run_id": "C_warm",
+  "started_at": "2026-11-02T15:54:45.598+00:00",
+  "duration_s": 6.33,
+  "requests": 5,
+  "status_codes": {
+    "200": 1,
+    "304": 4
+  },
+  "error_rate": 0.0,
+  "share_429": 0.0,
+  "share_403": 0.0,
+  "retries": 0,
+  "latency_median_ms": 172,
+  "latency_p95_ms": 1171.6,
+  "bytes_wire": 58304,
+  "bytes_decoded": 58304,
+  "avg_response_bytes": 58304,
+  "not_modified": 4,
+  "breaker_activations": 0,
+  "breaker_skipped": 0,
+  "watermark_skipped": 10,
+  "fallbacks": 0,
+  "detector": {
+    "ok": 1
+  },
+  "incidents": 0,
+  "collected": 0,
+  "known": 22,
+  "discarded": 0,
+  "history_key": "C_warm",
+  "history": {
+    "status": "green",
+    "checks": [],
+    "note": "истории нет — сравнивать не с чем"
+  },
+  "collected_min": 10,
+  "alerts": [],
+  "status": "green"
+}

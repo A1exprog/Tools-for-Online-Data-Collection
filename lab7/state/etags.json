@@ -1,0 +1,18 @@
+{
+  "https://httpbin.org/etag/lab7-a": {
+    "etag": "lab7-a",
+    "last_modified": "Mon, 02 Nov 2026 15:54:35 GMT"
+  },
+  "https://httpbin.org/etag/lab7-b": {
+    "etag": "lab7-b",
+    "last_modified": "Mon, 02 Nov 2026 15:54:38 GMT"
+  },
+  "https://httpbin.org/etag/lab7-c": {
+    "etag": "lab7-c",
+    "last_modified": "Mon, 02 Nov 2026 15:54:44 GMT"
+  },
+  "https://httpbin.org/cache": {
+    "etag": "570cb2e190014772beef1afa860f18f9",
+    "last_modified": "Mon, 02 Nov 2026 15:54:47 GMT"
+  }
+}

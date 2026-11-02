@@ -1,0 +1,66 @@
+{
+  "run_id": "S1_selector_timeout",
+  "started_at": "2026-11-02T15:54:51.955+00:00",
+  "duration_s": 20.05,
+  "requests": 3,
+  "status_codes": {
+    "200": 3
+  },
+  "error_rate": 0.6667,
+  "share_429": 0.0,
+  "share_403": 0.0,
+  "retries": 1,
+  "latency_median_ms": 3359,
+  "latency_p95_ms": 4203.2,
+  "bytes_wire": 63708,
+  "bytes_decoded": 63708,
+  "avg_response_bytes": 2860,
+  "not_modified": 0,
+  "breaker_activations": 0,
+  "breaker_skipped": 0,
+  "watermark_skipped": 0,
+  "fallbacks": 1,
+  "detector": {
+    "ok": 1
+  },
+  "incidents": 1,
+  "collected": 10,
+  "known": 0,
+  "discarded": 0,
+  "history_key": "S1_selector_timeout",
+  "history": {
+    "status": "green",
+    "checks": [
+      {
+        "metric": "collected",
+        "current": 10,
+        "median": 10,
+        "deviation": 0.0,
+        "status": "green"
+      },
+      {
+        "metric": "avg_response_bytes",
+        "current": 2860,
+        "median": 2860,
+        "deviation": 0.0,
+        "status": "green"
+      }
+    ]
+  },
+  "collected_min": 10,
+  "alerts": [
+    {
+      "metric": "error_rate",
+      "level": "red",
+      "value": 0.6667,
+      "reason": "больше 10% запросов с ошибкой: источник деградирует или мы его перегружаем"
+    },
+    {
+      "metric": "latency_p95_ms",
+      "level": "yellow",
+      "value": 4203.2,
+      "reason": "p95 латентности выше 3000 мс: сервер перегружен — адаптивная задержка растёт"
+    }
+  ],
+  "status": "red"
+}

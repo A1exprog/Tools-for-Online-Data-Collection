@@ -1,0 +1,65 @@
+{
+  "run_id": "S3_stub_pages",
+  "started_at": "2026-11-02T15:55:17.098+00:00",
+  "duration_s": 6.03,
+  "requests": 5,
+  "status_codes": {
+    "200": 4,
+    "403": 1
+  },
+  "error_rate": 0.4,
+  "share_429": 0.0,
+  "share_403": 0.2,
+  "retries": 0,
+  "latency_median_ms": 172,
+  "latency_p95_ms": 1775.6,
+  "bytes_wire": 10952,
+  "bytes_decoded": 10952,
+  "avg_response_bytes": 3507,
+  "not_modified": 0,
+  "breaker_activations": 0,
+  "breaker_skipped": 0,
+  "watermark_skipped": 0,
+  "fallbacks": 0,
+  "detector": {
+    "подозрение": 2,
+    "блокировка": 1,
+    "ok": 1
+  },
+  "incidents": 2,
+  "collected": 1,
+  "known": 0,
+  "discarded": 4,
+  "history_key": "S3_stub_pages",
+  "history": {
+    "status": "green",
+    "checks": [],
+    "note": "истории нет — сравнивать не с чем"
+  },
+  "collected_min": 1,
+  "alerts": [
+    {
+      "metric": "error_rate",
+      "level": "red",
+      "value": 0.4,
+      "reason": "больше 10% запросов с ошибкой: источник деградирует или мы его перегружаем"
+    },
+    {
+      "metric": "share_403",
+      "level": "red",
+      "value": 0.2,
+      "reason": "любой 403 — возможная блокировка, сбор домена останавливается"
+    },
+    {
+      "metric": "block_verdicts",
+      "level": "red",
+      "value": {
+        "подозрение": 2,
+        "блокировка": 1,
+        "ok": 1
+      },
+      "reason": "детектор вынес вердикт «блокировка»"
+    }
+  ],
+  "status": "red"
+}

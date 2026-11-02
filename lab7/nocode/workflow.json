@@ -1,0 +1,455 @@
+{
+  "name": "lab7_quotes_resilient",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6
+            }
+          ]
+        }
+      },
+      "id": "d416cf2c-39bf-4195-869f-3b374045303d",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -6880,
+        1184
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const pages = [1, 2, 3, 4, 5];\nreturn pages.map(p => ({\n  json: {\n    url: `https://quotes.toscrape.com/page/${p}/`,\n    page: p,\n    host: 'quotes.toscrape.com'\n  }\n}));"
+      },
+      "id": "b896f894-36fb-46ce-9c46-42b467876e27",
+      "name": "Build URL List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6672,
+        1184
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "eb0f3401-a590-4bb6-b557-2874f03d6f69",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -6448,
+        1184
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ 2 + Math.random() }}"
+      },
+      "id": "363da4db-4dcb-4fe0-a937-169097a5f897",
+      "name": "Wait 2–3 с (джиттер)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -6224,
+        1184
+      ],
+      "webhookId": "f730695d-a8cb-42e9-b1a9-c08a6705e106"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "EducationalCrawler/1.0 (+https://example.edu; contact: student@example.edu)"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml"
+            },
+            {
+              "name": "Accept-Encoding",
+              "value": "gzip, deflate"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "7161d018-acd5-44ef-9688-6596183b2808",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -6000,
+        1184
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Парсим HTML, полученный от HTTP Request.\n// Возвращаем массив items — по одному на каждую цитату.\n// URL берём из upstream (Wait), т.к. HTTP Request его не сохраняет.\n\nconst results = [];\n\nfor (const item of items) {\n  // 1. URL — через paired item от Wait\n  let url = null;\n  try {\n    url = $('Wait 2–3 с (джиттер)').item.json.url;\n  } catch (e) {\n    url = item.json && item.json.url ? item.json.url : 'unknown';\n  }\n\n  // 2. HTML — HTTP Request в text mode кладёт ответ в поле data\n  let html = '';\n  const j = item.json;\n  if (typeof j === 'string') html = j;\n  else if (j && typeof j.data === 'string') html = j.data;\n  else if (j && typeof j.body === 'string') html = j.body;\n  else if (j && typeof j.html === 'string') html = j.html;\n\n  if (!html || html.length < 200) {\n    results.push({ json: {\n      url, text: null, author: null, authorUrl: null, tags: [],\n      _parse_error: 'empty_or_invalid_html',\n      _html_length: html ? html.length : 0\n    }});\n    continue;\n  }\n\n  // 2a. Детектор блокировки по содержимому\n  const MARKERS = ['captcha', 'access denied', 'are you a robot', 'доступ ограничен', 'too many requests'];\n  const low = html.toLowerCase();\n  const hit = MARKERS.filter(m => low.includes(m));\n  if (hit.length) {\n    results.push({ json: { url, text: null, author: null, authorUrl: null, tags: [],\n      _parse_error: 'block_markers: ' + hit.join(', '), _html_length: html.length } });\n    continue;\n  }\n\n  // 3. Разбиваем на блоки цитат по открывающему <div class=\"quote\">\n  const parts = html.split(/<div[^>]*class=\"quote\"[^>]*>/i);\n\n  if (parts.length <= 1) {\n    results.push({ json: {\n      url, text: null, author: null, authorUrl: null, tags: [],\n      _parse_error: 'no_quote_blocks_found',\n      _html_length: html.length\n    }});\n    continue;\n  }\n\n  // 4. Для каждого блока — извлекаем поля\n  for (let i = 1; i < parts.length; i++) {\n    const block = parts[i];\n\n    const textMatch = block.match(/<span[^>]*class=\"text\"[^>]*>([\\s\\S]*?)<\\/span>/i);\n    const text = textMatch ? textMatch[1].trim() : null;\n\n    const authorMatch = block.match(/<small[^>]*class=\"author\"[^>]*>([\\s\\S]*?)<\\/small>/i);\n    const author = authorMatch ? authorMatch[1].trim() : null;\n\n    const authorUrlMatch = block.match(/<a[^>]*href=\"(\\/author\\/[^\"]+)\"[^>]*>/i);\n    const authorUrl = authorUrlMatch ? 'https://quotes.toscrape.com' + authorUrlMatch[1] : null;\n\n    const tags = [];\n    const tagRegex = /<a[^>]*class=\"tag\"[^>]*>([\\s\\S]*?)<\\/a>/gi;\n    let m;\n    while ((m = tagRegex.exec(block)) !== null) {\n      tags.push(m[1].trim());\n    }\n\n    if (!text && !author) continue;\n\n    results.push({ json: {\n      url,\n      text,\n      author,\n      authorUrl,\n      tags,\n      tags_count: tags.length,\n      text_length: text ? text.length : 0\n    }});\n  }\n}\n\nreturn results;"
+      },
+      "id": "aad33ff2-65fd-4a5d-81a8-0e62f4398749",
+      "name": "Parse quotes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5792,
+        1072
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a516ba47-6c9b-4c8b-92db-183a1f4e54de",
+      "name": "IF has text",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -5568,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  json: {\n    ...$json,\n    ts: new Date().toISOString(),\n    run_id: $execution.id,\n    event: 'quote_ok',\n    status: 'ok'\n  }\n};"
+      },
+      "id": "f876dbd2-525e-4691-82d1-895e60f0bb7f",
+      "name": "Log OK",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5248,
+        1376
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  json: {\n    ...$json,\n    ts: new Date().toISOString(),\n    run_id: $execution.id,\n    event: 'quote_suspicious',\n    status: 'warning',\n    reason: 'missing_text',\n    raw_preview: JSON.stringify($json).slice(0, 200)\n  }\n};"
+      },
+      "id": "35c3ee86-041c-402c-a2cf-4c520c9fdfa3",
+      "name": "Log Warning",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5440,
+        1376
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "let url = null;\ntry { url = $('Wait 2–3 с (джиттер)').item.json.url; } catch (e) { url = $json.url || null; }\nreturn {\n  json: {\n    ts: new Date().toISOString(),\n    run_id: $execution.id,\n    event: 'http_error',\n    status: 'error',\n    url,\n    error: $json.error ? ($json.error.message || JSON.stringify($json.error)) : 'unknown'\n  }\n};"
+      },
+      "id": "5217e88e-c7bc-44cb-923c-54ac0b50e702",
+      "name": "Log HTTP Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5840,
+        1376
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Сводка прогона из журнальных узлов\nconst ok = $('Log OK').all().length;\nlet warn = 0, errs = 0;\ntry { warn = $('Log Warning').all().length; } catch (e) {}\ntry { errs = $('Log HTTP Error').all().length; } catch (e) {}\nconst pages = $('Build URL List').all().length;\nreturn [{ json: { ts: new Date().toISOString(), run_id: $execution.id, event: 'run_summary',\n  pages, quotes_ok: ok, suspicious: warn, http_errors: errs,\n  status: (ok < 30 || errs > 0 || warn > 0) ? 'red' : 'green' } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6000,
+        900
+      ],
+      "id": "3f9cc2cf-62e0-426c-8818-4b5ad6773bd9",
+      "name": "Итог прогона",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b1202f74-bc21-4f55-8d10-cca9e5fda324",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "red",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -5780,
+        900
+      ],
+      "id": "5926c29d-3ba6-4466-9537-2b4876291ed6",
+      "name": "Мало записей или ошибки?"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=⚠️ lab7: собрано {{ $json.quotes_ok }} цитат (порог 30), подозрительных {{ $json.suspicious }}, ошибок HTTP {{ $json.http_errors }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -5560,
+        820
+      ],
+      "id": "19fe641f-d437-42ed-83e4-74a54a8f4de3",
+      "name": "Telegram: тревога",
+      "webhookId": "aafd208c-1ff1-4d3f-980d-c936e7216568",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=✅ lab7: {{ $json.quotes_ok }} цитат с {{ $json.pages }} страниц, ошибок нет",
+        "additionalFields": {
+          "appendAttribution": false,
+          "disable_notification": true
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -5560,
+        980
+      ],
+      "id": "27300a7f-cb1b-462e-aa32-6452c5d80611",
+      "name": "Telegram: сводка",
+      "webhookId": "47f5dd15-85f8-49ff-ad51-f69319b3056b",
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Build URL List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build URL List": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Итог прогона",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 2–3 с (джиттер)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Parse quotes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log HTTP Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse quotes": {
+      "main": [
+        [
+          {
+            "node": "IF has text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF has text": {
+      "main": [
+        [
+          {
+            "node": "Log OK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Warning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log OK": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Warning": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log HTTP Error": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 2–3 с (джиттер)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Итог прогона": {
+      "main": [
+        [
+          {
+            "node": "Мало записей или ошибки?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Мало записей или ошибки?": {
+      "main": [
+        [
+          {
+            "node": "Telegram: тревога",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: сводка",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all"
+  },
+  "versionId": "3869d13c-a2c0-48cc-acc2-7ef5f7f58b3c",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "nodeGroups": [],
+  "id": "9f06c740d59141f4",
+  "tags": []
+}

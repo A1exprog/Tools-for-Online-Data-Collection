@@ -1,0 +1,20 @@
+{
+  "separate_limiters": {
+    "processes": 4,
+    "requests": 40,
+    "target_rate": 2.0,
+    "actual_rate": 8.65,
+    "min_gap_s": 0.0,
+    "span_s": 4.51,
+    "start_delay_s": 0.34
+  },
+  "shared_limiter": {
+    "processes": 4,
+    "requests": 40,
+    "target_rate": 2.0,
+    "actual_rate": 2.0,
+    "min_gap_s": 0.499,
+    "span_s": 19.5,
+    "start_delay_s": 0.33
+  }
+}

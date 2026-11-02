@@ -1,0 +1,37 @@
+{
+  "run_id": "A",
+  "started_at": "2026-11-02T15:52:24.570+00:00",
+  "duration_s": 9.14,
+  "requests": 27,
+  "status_codes": {
+    "200": 27
+  },
+  "error_rate": 0.0,
+  "share_429": 0.0,
+  "share_403": 0.0,
+  "retries": 0,
+  "latency_median_ms": 172,
+  "latency_p95_ms": 858.0,
+  "bytes_wire": 192434,
+  "bytes_decoded": 192434,
+  "avg_response_bytes": 7127,
+  "not_modified": 0,
+  "breaker_activations": 0,
+  "breaker_skipped": 0,
+  "watermark_skipped": 0,
+  "fallbacks": 0,
+  "detector": {},
+  "incidents": 0,
+  "collected": 54,
+  "known": 0,
+  "discarded": 0,
+  "history_key": "A",
+  "history": {
+    "status": "green",
+    "checks": [],
+    "note": "истории нет — сравнивать не с чем"
+  },
+  "collected_min": 30,
+  "alerts": [],
+  "status": "green"
+}

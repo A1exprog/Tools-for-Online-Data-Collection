@@ -1,0 +1,18 @@
+{
+  "run_id": "S3_stub_pages",
+  "url": "http://127.0.0.1:8765/stub/forbidden",
+  "status": 403,
+  "verdict": "блокировка",
+  "reasons": [
+    "HTTP 403",
+    "маркеры: access denied"
+  ],
+  "headers": {
+    "Server": "BaseHTTP/0.6 Python/3.12.10",
+    "Date": "Mon, 02 Nov 2026 15:43:02 GMT",
+    "Content-Type": "text/html; charset=utf-8",
+    "Content-Length": "69",
+    "X-Synthetic": "1"
+  },
+  "saved_at": "20261102T154302013264Z"
+}

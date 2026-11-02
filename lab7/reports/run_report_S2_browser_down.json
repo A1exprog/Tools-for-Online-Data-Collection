@@ -1,0 +1,53 @@
+{
+  "run_id": "S2_browser_down",
+  "started_at": "2026-11-02T15:55:12.024+00:00",
+  "duration_s": 5.06,
+  "requests": 3,
+  "status_codes": {
+    "200": 3
+  },
+  "error_rate": 0.0,
+  "share_429": 0.0,
+  "share_403": 0.0,
+  "retries": 0,
+  "latency_median_ms": 187,
+  "latency_p95_ms": 721.6,
+  "bytes_wire": 10476,
+  "bytes_decoded": 10476,
+  "avg_response_bytes": 3492,
+  "not_modified": 0,
+  "breaker_activations": 0,
+  "breaker_skipped": 0,
+  "watermark_skipped": 0,
+  "fallbacks": 3,
+  "detector": {
+    "ok": 3
+  },
+  "incidents": 0,
+  "collected": 30,
+  "known": 0,
+  "discarded": 0,
+  "history_key": "S2_browser_down",
+  "history": {
+    "status": "green",
+    "checks": [
+      {
+        "metric": "collected",
+        "current": 30,
+        "median": 30,
+        "deviation": 0.0,
+        "status": "green"
+      },
+      {
+        "metric": "avg_response_bytes",
+        "current": 3492,
+        "median": 3492,
+        "deviation": 0.0,
+        "status": "green"
+      }
+    ]
+  },
+  "collected_min": 30,
+  "alerts": [],
+  "status": "green"
+}

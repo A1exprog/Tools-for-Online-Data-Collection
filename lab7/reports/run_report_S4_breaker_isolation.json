@@ -1,0 +1,56 @@
+{
+  "run_id": "S4_breaker_isolation",
+  "started_at": "2026-11-02T15:55:23.144+00:00",
+  "duration_s": 156.64,
+  "requests": 31,
+  "status_codes": {
+    "200": 27,
+    "503": 4
+  },
+  "error_rate": 0.129,
+  "share_429": 0.0,
+  "share_403": 0.0,
+  "retries": 4,
+  "latency_median_ms": 172,
+  "latency_p95_ms": 477.0,
+  "bytes_wire": 85678,
+  "bytes_decoded": 85678,
+  "avg_response_bytes": 3169,
+  "not_modified": 0,
+  "breaker_activations": 2,
+  "breaker_skipped": 13,
+  "watermark_skipped": 0,
+  "fallbacks": 0,
+  "detector": {
+    "ok": 27
+  },
+  "incidents": 0,
+  "collected": 27,
+  "known": 0,
+  "discarded": 13,
+  "breaker_by_host": {
+    "127.0.0.1:8765": 2
+  },
+  "history_key": "S4_breaker_isolation",
+  "history": {
+    "status": "green",
+    "checks": [],
+    "note": "истории нет — сравнивать не с чем"
+  },
+  "collected_min": 20,
+  "alerts": [
+    {
+      "metric": "error_rate",
+      "level": "red",
+      "value": 0.129,
+      "reason": "больше 10% запросов с ошибкой: источник деградирует или мы его перегружаем"
+    },
+    {
+      "metric": "breaker_activations",
+      "level": "yellow",
+      "value": 2,
+      "reason": "предохранитель срабатывал: один из доменов был недоступен"
+    }
+  ],
+  "status": "red"
+}

@@ -1,0 +1,11 @@
+{
+  "run_id": "S1_selector_timeout",
+  "url": "https://quotes.toscrape.com/js-delayed/page/1/?delay=12000",
+  "status": 200,
+  "verdict": "подозрение",
+  "reasons": [
+    "Page.wait_for_selector: Timeout 3000ms exceeded."
+  ],
+  "headers": {},
+  "saved_at": "20261102T155505147150Z"
+}

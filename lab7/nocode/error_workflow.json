@@ -1,0 +1,58 @@
+{
+  "name": "lab7_error_handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -6000,
+        200
+      ],
+      "id": "7172f92d-1256-427d-bead-cdcdf972a7e1",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=🛑 lab7: workflow упал на узле «{{ $json.execution.lastNodeExecuted }}»: {{ $json.execution.error.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -5780,
+        200
+      ],
+      "id": "a06fc34d-542b-455c-a27e-c11e30ed02fd",
+      "name": "Telegram: сбой workflow",
+      "webhookId": "a4cfc27d-c7f3-474c-98bc-b46f69e74b4f"
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Telegram: сбой workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1cbb8513-cf36-40c4-9f3f-2bb54d0aaa42",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "9a8df1b1ef8c40ff",
+  "tags": []
+}
