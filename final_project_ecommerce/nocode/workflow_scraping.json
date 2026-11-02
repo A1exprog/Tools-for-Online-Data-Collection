@@ -1,0 +1,857 @@
+{
+  "name": "E-commerce: сбор HTML + API нодами n8n",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "e0ffdb36-67e3-46c6-ad59-0d2603742f81",
+      "name": "Расписание: ежедневно 06:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "17cd856c-2028-4038-9592-bb0c0a45d339",
+      "name": "Ручной запуск",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.scrapingcourse.com/ecommerce/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "EduScraper/1.0 (+educational final project; contact: ax1sproger@gmail.com)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 20000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          },
+          "pagination": {
+            "pagination": {
+              "paginationMode": "responseContainsNextURL",
+              "nextURL": "={{ ($response.body.match(/<a[^>]*class=\"next page-numbers\"[^>]*href=\"([^\"]+)\"/) || $response.body.match(/<a[^>]*href=\"([^\"]+)\"[^>]*class=\"next page-numbers\"/) || [])[1] }}",
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.includes('next page-numbers') }}",
+              "limitPagesFetched": true,
+              "maxRequests": 30,
+              "requestInterval": 1000
+            }
+          }
+        }
+      },
+      "id": "a8866f18-afcc-4c79-be8f-2cd7dccac0df",
+      "name": "HTML: страницы каталога",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        200
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "notes": "Пагинация по ссылке «next» (как collect_html.py). 1 запрос/с, максимум 30 страниц — предохранитель. robots.txt сайта запрещает /ecommerce/* — используется то же задокументированное исключение, что и в коде (docs/legal_checklist.md, п. 4).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "data",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "card",
+              "cssSelector": "li.product",
+              "returnValue": "html",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {
+          "trimValues": true,
+          "cleanUpText": true
+        }
+      },
+      "id": "fa9b9c5d-bf3e-4c34-8faf-ebbd75abd813",
+      "name": "HTML: карточки на странице",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "card",
+        "options": {}
+      },
+      "id": "58428e20-4a5a-4845-bef5-428ce9adbdde",
+      "name": "Разбить на карточки",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        700,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "card",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "name",
+              "cssSelector": ".product-name, .woocommerce-loop-product__title",
+              "returnValue": "text"
+            },
+            {
+              "key": "price_text",
+              "cssSelector": ".price",
+              "returnValue": "text"
+            },
+            {
+              "key": "url",
+              "cssSelector": "a.woocommerce-LoopProduct-link",
+              "returnValue": "attribute",
+              "attribute": "href"
+            },
+            {
+              "key": "product_id",
+              "cssSelector": "a[data-product_id]",
+              "returnValue": "attribute",
+              "attribute": "data-product_id"
+            },
+            {
+              "key": "sku",
+              "cssSelector": "a[data-product_id]",
+              "returnValue": "attribute",
+              "attribute": "data-product_sku"
+            }
+          ]
+        },
+        "options": {
+          "trimValues": true,
+          "cleanUpText": true
+        }
+      },
+      "id": "f94a25a9-93ef-43a5-8369-10e5eecd9dce",
+      "name": "HTML: поля карточки",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        920,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "EduScraper/1.0 (+educational final project; contact: ax1sproger@gmail.com)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 20000,
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "data"
+            }
+          },
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 1000
+            }
+          }
+        }
+      },
+      "id": "7e992724-84df-487b-b998-df81065b9b79",
+      "name": "HTML: страница товара",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        340
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "notes": "188 карточек, батч 1 запрос в секунду (вежливость). Повтор при сбое — 3 попытки.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "data",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "categories",
+              "cssSelector": ".product_meta .posted_in a",
+              "returnValue": "text",
+              "returnArray": true
+            },
+            {
+              "key": "sku_detail",
+              "cssSelector": ".product_meta .sku",
+              "returnValue": "text"
+            },
+            {
+              "key": "stock_text",
+              "cssSelector": ".summary p.stock",
+              "returnValue": "text"
+            },
+            {
+              "key": "variations",
+              "cssSelector": "form.variations_form",
+              "returnValue": "attribute",
+              "attribute": "data-product_variations"
+            }
+          ]
+        },
+        "options": {
+          "trimValues": true,
+          "cleanUpText": true
+        }
+      },
+      "id": "d66b97af-946f-4de7-aa8a-a406505cbdb8",
+      "name": "HTML: поля страницы товара",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1360,
+        340
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "8fcfd190-cab3-4a79-b0c2-91b2207afab3",
+      "name": "Карточка + страница товара",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1580,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Нормализация HTML-товаров: аналог clean.py для scrapingcourse.com\nconst RULES = [  // порядок важен: первое совпадение побеждает (как config.yaml → linkage)\n  ['bags',      ['bag','bags','backpack','duffle','tote','messenger']],\n  ['watches',   ['watch','watches']],\n  ['fitness',   ['fitness','equipment','yoga','strap','band','ball','bottle','rope','kettlebell','dumbbell','roller','sprite','gear']],\n  ['outerwear', ['jacket','jackets','coat','windbreaker','shell','parka']],\n  ['bottoms',   ['pant','pants','short','shorts','legging','leggings','tights','capri','bottoms']],\n  ['tops',      ['hoodie','hoodies','sweatshirt','sweatshirts','tee','tees','shirt','tank','tanks','bra','bras','top','tops','pullover','sweater','jersey']],\n  ['shoes',     ['shoe','shoes','sneaker','sneakers','boot','boots']],\n];\nconst match = (text) => {\n  const blob = ' ' + String(text || '').toLowerCase().replace(/[-&|,]/g, ' ') + ' ';\n  for (const [group, words] of RULES)\n    if (words.some(w => new RegExp(`\\\\b${w}\\\\b`).test(blob))) return group;\n  return null;\n};\nconst nums = (t) => (String(t || '').match(/\\d[\\d,]*(?:\\.\\d+)?/g) || []).map(s => parseFloat(s.replace(/,/g, '')));\nconst now = new Date().toISOString();\nconst out = [];\nconst seen = new Set();\nfor (const item of $input.all()) {\n  const j = item.json;\n  const url = j.url || '';\n  const slug = (url.split('/product/')[1] || '').replace(/\\/$/, '');\n  if (!slug || seen.has(slug)) continue;           // дубль бизнес-ключа -> пропуск\n  seen.add(slug);\n  // цена: обычная, диапазон «$45 – $69» или распродажа (Original price … Current price …)\n  const p = nums(j.price_text);\n  let price = null, regular = null;\n  if (/current price/i.test(j.price_text || '') && p.length >= 2) { regular = p[0]; price = p[p.length - 1]; }\n  else if (p.length) { price = Math.min(...p); regular = price; }\n  // наличие: у вариативных товаров — по вариациям (у самого товара WooCommerce пишет outofstock)\n  let inStock = !/out of stock/i.test(j.stock_text || '');\n  let stockQty = null;\n  if (j.variations && j.variations !== 'false') {\n    try {\n      const vars = JSON.parse(j.variations);\n      inStock = vars.some(v => v.is_in_stock);\n      const q = vars.map(v => (String(v.availability_html || '').match(/(\\d+)\\s+in stock/i) || [])[1]).filter(Boolean).map(Number);\n      stockQty = q.length ? q.reduce((a, b) => a + b, 0) : null;\n    } catch (e) { /* битый JSON — оставляем текстовый признак */ }\n  }\n  const cats = Array.isArray(j.categories) ? j.categories : (j.categories ? [j.categories] : []);\n  out.push({ json: {\n    business_key: `scrapingcourse:${slug}`,\n    source: 'scrapingcourse.com',\n    source_id: slug,\n    title: String(j.name || '').trim(),\n    category_raw: cats.join(' | '),\n    product_group: match(cats.join(' ')) || match(j.name) || 'other',\n    price_usd: price,\n    regular_price_usd: regular,\n    discount_pct: price && regular && regular > price ? +((1 - price / regular) * 100).toFixed(2) : 0,\n    rating: null,\n    in_stock: inStock,\n    stock_qty: stockQty,\n    sku: j.sku_detail || j.sku || null,\n    url,\n    collected_at: now,\n    collected_by: 'n8n',\n  }});\n}\nreturn out;\n"
+      },
+      "id": "f383334f-ac04-480f-a74f-2349ec29b11b",
+      "name": "Нормализация HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        220
+      ],
+      "notes": "Цена → число, slug → бизнес-ключ, группа по правилам, наличие по вариациям, дубли отбрасываются.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "url": "https://dummyjson.com/products",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "EduScraper/1.0 (+educational final project; contact: ax1sproger@gmail.com)"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 20000,
+          "pagination": {
+            "pagination": {
+              "parameters": {
+                "parameters": [
+                  {
+                    "type": "qs",
+                    "name": "skip",
+                    "value": "={{ $pageCount * 50 }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.skip + $response.body.limit >= $response.body.total }}",
+              "limitPagesFetched": true,
+              "maxRequests": 20,
+              "requestInterval": 500
+            }
+          }
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "50"
+            },
+            {
+              "name": "select",
+              "value": "id,title,category,brand,price,discountPercentage,rating,stock,availabilityStatus,sku,reviews"
+            }
+          ]
+        }
+      },
+      "id": "7f5849eb-9172-4ea7-8aff-f69a14f44837",
+      "name": "API: товары (limit/skip)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        620
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "notes": "Пагинация skip = номер страницы × 50, до поля total (как collect_api.py).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "products",
+        "options": {}
+      },
+      "id": "ab1dadb6-996b-4c20-971e-2771ddba0e45",
+      "name": "Разбить на товары API",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        480,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Нормализация товаров DummyJSON: аналог clean.py (без персональных данных)\nconst MAP = { 'mens-shirts':'tops', 'tops':'tops', 'womens-bags':'bags', 'mens-watches':'watches',\n  'womens-watches':'watches', 'sports-accessories':'fitness', 'mens-shoes':'shoes', 'womens-shoes':'shoes',\n  'womens-dresses':'dresses' };\nconst now = new Date().toISOString();\nreturn $input.all().map(({ json: p }) => {\n  const disc = p.discountPercentage ?? 0;\n  return { json: {\n    business_key: `dummyjson:${p.id}`,\n    source: 'dummyjson.com',\n    source_id: String(p.id),\n    title: p.title,\n    category_raw: p.category,\n    product_group: MAP[p.category] || 'other',\n    price_usd: p.price,\n    regular_price_usd: disc < 100 ? +(p.price / (1 - disc / 100)).toFixed(2) : p.price,\n    discount_pct: disc,\n    rating: p.rating,\n    in_stock: (p.stock ?? 0) > 0,\n    stock_qty: p.stock ?? null,\n    sku: p.sku || null,\n    url: `https://dummyjson.com/products/${p.id}`,\n    collected_at: now,\n    collected_by: 'n8n',\n  }};\n});\n"
+      },
+      "id": "83e1c16a-8ae8-46e4-be60-2f7365625ce2",
+      "name": "Нормализация API (без ПДн)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        560
+      ],
+      "notes": "Группа по категории DummyJSON, цена до скидки, наличие по stock. Отзывы с ПДн сюда не попадают.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Отзывы DummyJSON: по строке на отзыв, имя и e-mail автора НЕ сохраняем\nconst out = [];\nfor (const { json: p } of $input.all()) {\n  (p.reviews || []).forEach((r, i) => out.push({ json: {\n    review_key: `dummyjson:${p.id}:r${i}`,\n    product_key: `dummyjson:${p.id}`,\n    rating: r.rating,\n    comment: r.comment,\n    review_date: r.date,\n  }}));\n}\nreturn out;\n"
+      },
+      "id": "291034b9-5ffa-4059-92c5-718abdbbf8d5",
+      "name": "Отзывы API (без ПДн)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        920,
+        760
+      ],
+      "notes": "reviewerName и reviewerEmail не копируются.",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "mode": "append"
+      },
+      "id": "8c33b16e-d797-4f2a-b899-74f2fc9b90a6",
+      "name": "Все товары",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2020,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Проверка качества: упрощённый аналог quality.py (6 метрик, светофор)\nconst rows = $input.all().map(i => i.json);\nlet reviews = 0;\ntry { reviews = $('Отзывы API (без ПДн)').all().length; } catch (e) { reviews = 0; }\nconst n = rows.length;\nconst bySrc = s => rows.filter(r => r.source === s).length;\nconst keys = rows.map(r => r.business_key);\nconst dupPct = n ? (1 - new Set(keys).size / n) * 100 : 0;\nconst noPricePct = n ? rows.filter(r => !(r.price_usd > 0)).length / n * 100 : 100;\nconst html = rows.filter(r => r.source === 'scrapingcourse.com');\nconst unmappedPct = html.length ? html.filter(r => r.product_group === 'other').length / html.length * 100 : 100;\nconst groupsHtml = new Set(html.map(r => r.product_group).filter(g => g !== 'other'));\nconst overlap = [...new Set(rows.filter(r => r.source === 'dummyjson.com').map(r => r.product_group))]\n  .filter(g => groupsHtml.has(g)).length;\n// [название, значение, warn, critical, направление]\nconst M = [\n  ['products_count',          n,                                       350, 300, 'min'],\n  ['min_products_per_source', Math.min(bySrc('scrapingcourse.com'), bySrc('dummyjson.com')), 150, 100, 'min'],\n  ['reviews_count',           reviews,                                 400, 300, 'min'],\n  ['duplicate_key_pct',       +dupPct.toFixed(2),                      0.5, 2,   'max'],\n  ['missing_price_pct',       +noPricePct.toFixed(2),                  1,   5,   'max'],\n  ['html_unmapped_group_pct', +unmappedPct.toFixed(2),                 15,  40,  'max'],\n  ['group_overlap_count',     overlap,                                 3,   1,   'min'],\n];\nconst level = ([, v, w, c, d]) => d === 'min' ? (v < c ? 'CRITICAL' : v < w ? 'WARN' : 'OK')\n                                             : (v > c ? 'CRITICAL' : v > w ? 'WARN' : 'OK');\nconst metrics = M.map(m => ({ name: m[0], value: m[1], warn: m[2], critical: m[3], level: level(m) }));\nconst status = metrics.some(m => m.level === 'CRITICAL') ? 'RED' : metrics.some(m => m.level === 'WARN') ? 'YELLOW' : 'GREEN';\nconst lines = metrics.map(m => `${m.level === 'OK' ? '✅' : m.level === 'WARN' ? '⚠️' : '⛔'} ${m.name}: ${m.value}`);\nreturn [{ json: {\n  status, metrics,\n  products: n, html_products: bySrc('scrapingcourse.com'), api_products: bySrc('dummyjson.com'), reviews,\n  message: `n8n-сбор: ${status}\\nТоваров ${n} (HTML ${bySrc('scrapingcourse.com')}, API ${bySrc('dummyjson.com')}), отзывов ${reviews}\\n` + lines.join('\\n'),\n}}];\n"
+      },
+      "id": "68571d2d-32dd-4225-9623-5a05fda83ef3",
+      "name": "Проверка качества",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        420
+      ],
+      "notes": "7 метрик с порогами WARN/CRITICAL и светофор GREEN/YELLOW/RED (упрощённый quality.py).",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "656e21bf-2740-4599-a8ea-9ec7e57c90a5",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "RED",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e0e19bb0-17e1-486f-a245-f8481b6ee374",
+      "name": "Качество RED?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2460,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=⚠️ ИНЦИДЕНТ\n{{ $json.message }}",
+        "additionalFields": {}
+      },
+      "id": "f4a121ab-b655-4f8d-aa74-bd0ca68ee60e",
+      "name": "Telegram: инцидент",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2680,
+        320
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_ME",
+          "name": "Telegram bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "disable_notification": true
+        }
+      },
+      "id": "d6f13c9d-4785-4856-9070-db2ce002b0d8",
+      "name": "Telegram: сводка",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2680,
+        520
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_ME",
+          "name": "Telegram bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "csv",
+        "options": {
+          "fileName": "products_n8n.csv"
+        }
+      },
+      "id": "dc0eb492-2706-46b0-ad1f-adfa3bcb7b8d",
+      "name": "Товары → CSV",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2240,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:/Users/A1ex5/Desktop/CodeFlow/web-scrapers/total_project/final_project_ecommerce/nocode/output/products_n8n.csv",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "id": "96cdf61c-3ece-4635-96fe-14897acb5c6c",
+      "name": "Сохранить products_n8n.csv",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        2460,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "csv",
+        "options": {
+          "fileName": "reviews_n8n.csv"
+        }
+      },
+      "id": "117f1619-e98a-4fda-8ac6-9ccf1c93ff3f",
+      "name": "Отзывы → CSV",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1140,
+        760
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "C:/Users/A1ex5/Desktop/CodeFlow/web-scrapers/total_project/final_project_ecommerce/nocode/output/reviews_n8n.csv",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "id": "d655b201-604a-4ec6-9d2f-143433d3ff9a",
+      "name": "Сохранить reviews_n8n.csv",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        760
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "products"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "business_key"
+          ]
+        },
+        "options": {}
+      },
+      "id": "7c42f848-c5b0-4df4-afa2-d17f9179e59a",
+      "name": "Google Sheets: товары (опц.)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2240,
+        840
+      ],
+      "disabled": true,
+      "notes": "Опционально: подключите Google и включите узел — UPSERT в таблицу по business_key (повторный запуск не создаёт дублей)."
+    }
+  ],
+  "connections": {
+    "Расписание: ежедневно 06:00": {
+      "main": [
+        [
+          {
+            "node": "HTML: страницы каталога",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "API: товары (limit/skip)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ручной запуск": {
+      "main": [
+        [
+          {
+            "node": "HTML: страницы каталога",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "API: товары (limit/skip)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML: страницы каталога": {
+      "main": [
+        [
+          {
+            "node": "HTML: карточки на странице",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML: карточки на странице": {
+      "main": [
+        [
+          {
+            "node": "Разбить на карточки",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Разбить на карточки": {
+      "main": [
+        [
+          {
+            "node": "HTML: поля карточки",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML: поля карточки": {
+      "main": [
+        [
+          {
+            "node": "HTML: страница товара",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Карточка + страница товара",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML: страница товара": {
+      "main": [
+        [
+          {
+            "node": "HTML: поля страницы товара",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML: поля страницы товара": {
+      "main": [
+        [
+          {
+            "node": "Карточка + страница товара",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Карточка + страница товара": {
+      "main": [
+        [
+          {
+            "node": "Нормализация HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Нормализация HTML": {
+      "main": [
+        [
+          {
+            "node": "Все товары",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "API: товары (limit/skip)": {
+      "main": [
+        [
+          {
+            "node": "Разбить на товары API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Разбить на товары API": {
+      "main": [
+        [
+          {
+            "node": "Нормализация API (без ПДн)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Отзывы API (без ПДн)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Нормализация API (без ПДн)": {
+      "main": [
+        [
+          {
+            "node": "Все товары",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Отзывы API (без ПДн)": {
+      "main": [
+        [
+          {
+            "node": "Отзывы → CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Отзывы → CSV": {
+      "main": [
+        [
+          {
+            "node": "Сохранить reviews_n8n.csv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Все товары": {
+      "main": [
+        [
+          {
+            "node": "Проверка качества",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Товары → CSV",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets: товары (опц.)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка качества": {
+      "main": [
+        [
+          {
+            "node": "Качество RED?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Качество RED?": {
+      "main": [
+        [
+          {
+            "node": "Telegram: инцидент",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: сводка",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Товары → CSV": {
+      "main": [
+        [
+          {
+            "node": "Сохранить products_n8n.csv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Yekaterinburg"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

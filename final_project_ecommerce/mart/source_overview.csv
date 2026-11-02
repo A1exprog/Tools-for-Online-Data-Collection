@@ -1,0 +1,3 @@
+source,n_products,n_groups,avg_price,in_stock_pct,discounted_pct,last_updated_at
+dummyjson.com,194,7,1570.1,97.9,100.0,2026-10-27T17:25:18+00:00
+scrapingcourse.com,188,7,42.13,100.0,0.5,2026-10-27T17:25:18+00:00

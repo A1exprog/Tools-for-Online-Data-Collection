@@ -1,0 +1,262 @@
+{
+  "name": "E-commerce pipeline: расписание, запуск, оповещения",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "dd555a8d-3f72-41be-b05c-480608ed0c1d",
+      "name": "Расписание: ежедневно 06:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "46950604-2b24-47b3-ace4-cba60f7f2a36",
+      "name": "Ручной запуск (демо)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "command": "cd /d \"C:\\Users\\A1ex5\\Desktop\\CodeFlow\\web-scrapers\\total_project\\final_project_ecommerce\" && python -m src.n8n_entry"
+      },
+      "id": "83d7c3d0-90a7-4be2-aa1b-065313d47ed2",
+      "name": "Запуск пайплайна (Python)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        260,
+        100
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "notes": "src/n8n_entry.py всегда завершается с кодом 0 и печатает одну JSON-строку. На Linux/macOS: cd /path/to/final_project_ecommerce && python3 -m src.n8n_entry"
+    },
+    {
+      "parameters": {
+        "jsCode": "// stdout узла Execute Command -> объект сводки\nconst lines = ($json.stdout || '').trim().split('\\n');\nlet s;\ntry { s = JSON.parse(lines[lines.length - 1]); }\ncatch (e) { s = { exit_code: 2, critical: true, error: 'не удалось разобрать вывод: ' + ($json.stderr || e.message) }; }\nconst alerts = (s.alerts || []).map(a => `• ${a.severity.toUpperCase()} ${a.name}: ${a.message}`).join('\\n') || '• нет';\nconst icon = s.critical ? '🔴' : (s.quality_status === 'YELLOW' ? '🟡' : '🟢');\ns.message = `${icon} Пайплайн e-commerce, прогон ${s.run_id || '—'}\\n` +\n  `exit_code=${s.exit_code}, качество=${s.quality_status}, ${s.duration_sec} c\\n` +\n  `Источники: ${JSON.stringify(s.source_status)}\\n` +\n  `Запросов ${s.requests_total}, 304: ${s.not_modified_304}, ошибок ${((s.error_rate||0)*100).toFixed(1)}%, p95 ${s.latency_p95_ms} мс\\n` +\n  `Товаров ${s.products_clean}, отзывов ${s.reviews_clean}; загрузка: ${JSON.stringify(s.load)}\\n` +\n  `Оповещения:\\n${alerts}` + (s.error ? `\\nОшибка: ${s.error}` : '');\nreturn [{ json: s }];"
+      },
+      "id": "65ed3213-1e0e-45f3-973d-203d6aebabd9",
+      "name": "Разбор отчёта",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "51fd5516-079b-43d9-bd52-012144b6a54f",
+              "leftValue": "={{ $json.critical }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f714b3c9-81ab-4e0e-a984-fb61502961fa",
+      "name": "Есть критичные проблемы?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        780,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=⚠️ ИНЦИДЕНТ\n{{ $json.message }}",
+        "additionalFields": {}
+      },
+      "id": "1acdc2be-61df-4821-abbb-2bf0e08aef5b",
+      "name": "Telegram: инцидент",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        0
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_ME",
+          "name": "Telegram bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "disable_notification": true
+        }
+      },
+      "id": "4b2676bc-812e-49e3-9933-1e2b98c96bc4",
+      "name": "Telegram: сводка (тихо)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        200
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REPLACE_ME",
+          "name": "Telegram bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "REPLACE_WITH_SHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $json.run_id }}",
+            "exit_code": "={{ $json.exit_code }}",
+            "quality": "={{ $json.quality_status }}",
+            "requests": "={{ $json.requests_total }}",
+            "http_304": "={{ $json.not_modified_304 }}",
+            "error_rate": "={{ $json.error_rate }}",
+            "p95_ms": "={{ $json.latency_p95_ms }}",
+            "products": "={{ $json.products_clean }}",
+            "reviews": "={{ $json.reviews_clean }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "2c1005aa-0d2f-40f7-bc70-07f1bc408297",
+      "name": "Google Sheets: журнал прогонов (опц.)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1040,
+        400
+      ],
+      "disabled": true,
+      "notes": "Опционально: включите и подключите учётные данные Google — выгрузка метрик прогона в таблицу."
+    }
+  ],
+  "connections": {
+    "Расписание: ежедневно 06:00": {
+      "main": [
+        [
+          {
+            "node": "Запуск пайплайна (Python)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ручной запуск (демо)": {
+      "main": [
+        [
+          {
+            "node": "Запуск пайплайна (Python)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запуск пайплайна (Python)": {
+      "main": [
+        [
+          {
+            "node": "Разбор отчёта",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Разбор отчёта": {
+      "main": [
+        [
+          {
+            "node": "Есть критичные проблемы?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets: журнал прогонов (опц.)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Есть критичные проблемы?": {
+      "main": [
+        [
+          {
+            "node": "Telegram: инцидент",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: сводка (тихо)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Yekaterinburg"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

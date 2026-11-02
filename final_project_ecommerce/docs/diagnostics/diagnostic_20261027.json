@@ -1,0 +1,72 @@
+{
+  "checked_at": "2026-10-27T15:57:22+00:00",
+  "html_listing": {
+    "url": "https://www.scrapingcourse.com/ecommerce/",
+    "status": 200,
+    "content_type": "text/html; charset=UTF-8",
+    "bytes": 85606,
+    "headers": {
+      "ETag": null,
+      "Last-Modified": null,
+      "Content-Encoding": "gzip",
+      "Cache-Control": null,
+      "Server": "cloudflare",
+      "X-Robots-Tag": null
+    },
+    "step1_view_source_cards": 16,
+    "step2_text_found": {
+      "names_in_raw_html": 16,
+      "prices_in_raw_html": 16,
+      "sample": [
+        "Abominable Hoodie",
+        "Adrienne Trek Jacket",
+        "Aeon Capri",
+        "Aero Daily Fitness Tee",
+        "Aether Gym Pant"
+      ]
+    },
+    "step3_xhr": {
+      "script_tags": 22,
+      "js_render_markers": [],
+      "wp_json_link": true,
+      "next_link": true
+    },
+    "result_count_text": "Showing 1–16 of 188 results",
+    "verdict": "browser_not_needed"
+  },
+  "html_robots": {
+    "url": "https://www.scrapingcourse.com/robots.txt",
+    "status": 200,
+    "text": "User-agent: *\nDisallow: /ecommerce/*"
+  },
+  "api": {
+    "url": "https://dummyjson.com/products?limit=1&select=id%2Ctitle%2Cprice",
+    "status": 200,
+    "headers": {
+      "ETag": "W/\"6b-7v2rG/FT/sf8jcGwvrusBLA7UW8\"",
+      "Content-Encoding": "gzip",
+      "Cache-Control": null,
+      "X-RateLimit-Limit": "100",
+      "X-RateLimit-Remaining": "99",
+      "Retry-After": null
+    },
+    "conditional_request_status": 304,
+    "total": 194,
+    "keys": [
+      "limit",
+      "products",
+      "skip",
+      "total"
+    ],
+    "sample": {
+      "id": 1,
+      "title": "Essence Mascara Lash Princess",
+      "price": 9.99
+    }
+  },
+  "api_robots": {
+    "url": "https://dummyjson.com/robots.txt",
+    "status": 200,
+    "text": "User-agent: *\nDisallow: /auth/\nDisallow: /c/\nDisallow: /webhook/\n\nSitemap: https://dummyjson.com/sitemap.xml\n"
+  }
+}

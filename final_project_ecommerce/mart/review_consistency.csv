@@ -1,0 +1,195 @@
+business_key,title,category_raw,product_group,price_usd,discount_pct,product_rating,n_reviews,avg_review_rating,rating_gap
+dummyjson:1,Essence Mascara Lash Princess,beauty,other,9.99,10.48,2.56,3,4.0,-1.44
+dummyjson:10,Gucci Bloom Eau de,fragrances,other,79.99,14.39,2.74,3,3.333,-0.593
+dummyjson:100,Apple Airpods,mobile-accessories,other,129.99,15.54,4.15,3,4.0,0.15
+dummyjson:101,Apple AirPods Max Silver,mobile-accessories,other,549.99,13.67,3.47,3,4.333,-0.863
+dummyjson:102,Apple Airpower Wireless Charger,mobile-accessories,other,79.99,4.48,3.68,3,4.0,-0.32
+dummyjson:103,Apple HomePod Mini Cosmic Grey,mobile-accessories,other,99.99,18.1,4.62,3,4.0,0.62
+dummyjson:104,Apple iPhone Charger,mobile-accessories,other,19.99,18.52,4.15,3,2.667,1.483
+dummyjson:105,Apple MagSafe Battery Pack,mobile-accessories,other,99.99,17.17,3.62,3,3.0,0.62
+dummyjson:106,Apple Watch Series 4 Gold,mobile-accessories,other,349.99,12.02,2.74,3,3.667,-0.927
+dummyjson:107,Beats Flex Wireless Earphones,mobile-accessories,other,49.99,5.73,4.24,3,3.0,1.24
+dummyjson:108,iPhone 12 Silicone Case with MagSafe Plum,mobile-accessories,other,29.99,13.85,3.62,3,4.0,-0.38
+dummyjson:109,Monopod,mobile-accessories,other,19.99,8.58,4.43,3,3.333,1.097
+dummyjson:11,Annibale Colombo Bed,furniture,other,1899.99,8.57,4.77,3,2.333,2.437
+dummyjson:110,Selfie Lamp with iPhone,mobile-accessories,other,14.99,19.4,3.55,3,3.667,-0.117
+dummyjson:111,Selfie Stick Monopod,mobile-accessories,other,12.99,19.12,3.88,3,3.0,0.88
+dummyjson:112,TV Studio Camera Pedestal,mobile-accessories,other,499.99,8.31,2.78,3,4.333,-1.553
+dummyjson:113,Generic Motorcycle,motorcycle,other,3999.99,12.1,4.91,3,3.667,1.243
+dummyjson:114,Kawasaki Z800,motorcycle,other,8999.99,9.77,3.98,3,4.333,-0.353
+dummyjson:115,MotoGP CI.H1,motorcycle,other,14999.99,6.92,2.97,3,4.333,-1.363
+dummyjson:116,Scooter Motorcycle,motorcycle,other,2999.99,6.27,2.53,3,3.0,-0.47
+dummyjson:117,Sportbike Motorcycle,motorcycle,other,7499.99,11.58,3.94,3,2.333,1.607
+dummyjson:118,Attitude Super Leaves Hand Soap,skin-care,other,8.99,18.49,3.19,3,4.667,-1.477
+dummyjson:119,Olay Ultra Moisture Shea Butter Body Wash,skin-care,other,12.99,16.39,4.51,3,4.0,0.51
+dummyjson:12,Annibale Colombo Sofa,furniture,other,2499.99,14.4,3.92,3,3.0,0.92
+dummyjson:120,Vaseline Men Body and Face Lotion,skin-care,other,9.99,13.39,3.16,3,4.333,-1.173
+dummyjson:121,iPhone 5s,smartphones,other,199.99,12.91,2.83,3,3.667,-0.837
+dummyjson:122,iPhone 6,smartphones,other,299.99,6.69,3.41,3,4.0,-0.59
+dummyjson:123,iPhone 13 Pro,smartphones,other,1099.99,9.37,4.12,3,4.333,-0.213
+dummyjson:124,iPhone X,smartphones,other,899.99,19.59,2.51,3,3.667,-1.157
+dummyjson:125,Oppo A57,smartphones,other,249.99,2.43,3.94,3,3.667,0.273
+dummyjson:126,Oppo F19 Pro Plus,smartphones,other,399.99,18.64,3.51,3,4.667,-1.157
+dummyjson:127,Oppo K1,smartphones,other,299.99,18.29,4.25,3,3.333,0.917
+dummyjson:128,Realme C35,smartphones,other,149.99,15.3,4.2,3,3.333,0.867
+dummyjson:129,Realme X,smartphones,other,299.99,6.95,3.7,3,5.0,-1.3
+dummyjson:13,Bedside Table African Cherry,furniture,other,299.99,19.09,2.87,3,4.0,-1.13
+dummyjson:130,Realme XT,smartphones,other,349.99,11.51,4.58,3,4.0,0.58
+dummyjson:131,Samsung Galaxy S7,smartphones,other,299.99,19.55,3.3,3,3.0,0.3
+dummyjson:132,Samsung Galaxy S8,smartphones,other,499.99,19.45,4.4,3,4.0,0.4
+dummyjson:133,Samsung Galaxy S10,smartphones,other,699.99,5.59,3.06,3,3.667,-0.607
+dummyjson:134,Vivo S1,smartphones,other,249.99,10.17,3.5,3,3.667,-0.167
+dummyjson:135,Vivo V9,smartphones,other,299.99,17.67,3.6,3,3.667,-0.067
+dummyjson:136,Vivo X21,smartphones,other,499.99,17.41,4.26,3,3.333,0.927
+dummyjson:137,American Football,sports-accessories,fitness,19.99,4.93,4.91,3,4.0,0.91
+dummyjson:138,Baseball Ball,sports-accessories,fitness,8.99,1.71,2.57,3,3.333,-0.763
+dummyjson:139,Baseball Glove,sports-accessories,fitness,24.99,2.9,3.96,3,2.667,1.293
+dummyjson:14,Knoll Saarinen Executive Conference Chair,furniture,other,499.99,2.01,4.88,3,3.0,1.88
+dummyjson:140,Basketball,sports-accessories,fitness,14.99,7.44,4.66,3,3.667,0.993
+dummyjson:141,Basketball Rim,sports-accessories,fitness,39.99,7.74,4.6,3,3.333,1.267
+dummyjson:142,Cricket Ball,sports-accessories,fitness,12.99,8.63,3.53,3,1.333,2.197
+dummyjson:143,Cricket Bat,sports-accessories,fitness,29.99,3.29,3.17,3,4.333,-1.163
+dummyjson:144,Cricket Helmet,sports-accessories,fitness,44.99,9.64,4.69,3,4.333,0.357
+dummyjson:145,Cricket Wicket,sports-accessories,fitness,29.99,16.93,4.73,3,4.333,0.397
+dummyjson:146,Feather Shuttlecock,sports-accessories,fitness,5.99,2.95,2.85,3,4.333,-1.483
+dummyjson:147,Football,sports-accessories,fitness,17.99,5.15,3.28,3,3.333,-0.053
+dummyjson:148,Golf Ball,sports-accessories,fitness,9.99,17.37,4.3,3,3.0,1.3
+dummyjson:149,Iron Golf,sports-accessories,fitness,49.99,6.53,4.41,3,3.667,0.743
+dummyjson:15,Wooden Bathroom Sink With Mirror,furniture,other,799.99,8.8,3.59,3,4.0,-0.41
+dummyjson:150,Metal Baseball Bat,sports-accessories,fitness,29.99,19.51,4.66,3,4.667,-0.007
+dummyjson:151,Tennis Ball,sports-accessories,fitness,6.99,11.76,4.06,3,4.333,-0.273
+dummyjson:152,Tennis Racket,sports-accessories,fitness,49.99,19.61,4.03,3,4.333,-0.303
+dummyjson:153,Volleyball,sports-accessories,fitness,11.99,12.25,3.84,3,3.0,0.84
+dummyjson:154,Black Sun Glasses,sunglasses,other,29.99,4.94,4.41,3,3.0,1.41
+dummyjson:155,Classic Sun Glasses,sunglasses,other,24.99,4.94,3.86,3,4.0,-0.14
+dummyjson:156,Green and Black Glasses,sunglasses,other,34.99,1.01,4.55,3,3.667,0.883
+dummyjson:157,Party Glasses,sunglasses,other,19.99,11.22,2.79,3,4.667,-1.877
+dummyjson:158,Sunglasses,sunglasses,other,22.99,1.51,3.02,3,3.667,-0.647
+dummyjson:159,iPad Mini 2021 Starlight,tablets,other,499.99,3.64,3.18,3,4.333,-1.153
+dummyjson:16,Apple,groceries,other,1.99,12.62,4.19,3,3.0,1.19
+dummyjson:160,Samsung Galaxy Tab S8 Plus Grey,tablets,other,599.99,13.31,4.68,3,3.0,1.68
+dummyjson:161,Samsung Galaxy Tab White,tablets,other,349.99,18.2,3.72,3,2.333,1.387
+dummyjson:162,Blue Frock,tops,tops,29.99,12.13,4.17,3,4.0,0.17
+dummyjson:163,Girl Summer Dress,tops,tops,19.99,19.2,4.77,3,4.333,0.437
+dummyjson:164,Gray Dress,tops,tops,34.99,14.28,2.72,3,4.667,-1.947
+dummyjson:165,Short Frock,tops,tops,24.99,13.45,3.23,3,4.0,-0.77
+dummyjson:166,Tartan Dress,tops,tops,39.99,12.95,4.05,3,4.0,0.05
+dummyjson:167,300 Touring,vehicle,other,28999.99,3.98,4.05,3,3.667,0.383
+dummyjson:168,Charger SXT RWD,vehicle,other,32999.99,8.23,2.58,3,3.667,-1.087
+dummyjson:169,Dodge Hornet GT Plus,vehicle,other,24999.99,2.63,2.65,3,4.0,-1.35
+dummyjson:17,Beef Steak,groceries,other,12.99,9.61,4.47,3,4.0,0.47
+dummyjson:170,Durango SXT RWD,vehicle,other,36999.99,16.44,4.07,3,3.333,0.737
+dummyjson:171,Pacifica Touring,vehicle,other,31999.99,14.76,3.62,3,5.0,-1.38
+dummyjson:172,Blue Women's Handbag,womens-bags,bags,49.99,17.88,2.92,3,3.333,-0.413
+dummyjson:173,Heshe Women's Leather Bag,womens-bags,bags,129.99,3.87,4.92,3,4.333,0.587
+dummyjson:174,Prada Women Bag,womens-bags,bags,599.99,14.09,2.71,3,3.667,-0.957
+dummyjson:175,White Faux Leather Backpack,womens-bags,bags,39.99,15.2,3.36,3,3.333,0.027
+dummyjson:176,Women Handbag Black,womens-bags,bags,59.99,11.63,2.89,3,3.333,-0.443
+dummyjson:177,Black Women's Gown,womens-dresses,dresses,129.99,10.48,3.64,3,4.0,-0.36
+dummyjson:178,Corset Leather With Skirt,womens-dresses,dresses,89.99,16.26,3.05,3,4.333,-1.283
+dummyjson:179,Corset With Black Skirt,womens-dresses,dresses,79.99,15.06,4.52,3,4.0,0.52
+dummyjson:18,Cat Food,groceries,other,8.99,9.58,3.13,3,2.667,0.463
+dummyjson:180,Dress Pea,womens-dresses,dresses,49.99,17.68,4.88,3,2.333,2.547
+dummyjson:181,Marni Red & Black Suit,womens-dresses,dresses,179.99,19.02,4.48,3,4.0,0.48
+dummyjson:182,Green Crystal Earring,womens-jewellery,other,29.99,15.24,3.96,3,4.333,-0.373
+dummyjson:183,Green Oval Earring,womens-jewellery,other,24.99,15.18,3.57,3,4.0,-0.43
+dummyjson:184,Tropical Earring,womens-jewellery,other,19.99,0.76,4.4,3,3.333,1.067
+dummyjson:185,Black & Brown Slipper,womens-shoes,shoes,19.99,3.33,2.53,3,3.667,-1.137
+dummyjson:186,Calvin Klein Heel Shoes,womens-shoes,shoes,79.99,3.19,4.92,3,3.667,1.253
+dummyjson:187,Golden Shoes Woman,womens-shoes,shoes,49.99,13.93,3.26,3,4.333,-1.073
+dummyjson:188,Pampi Shoes,womens-shoes,shoes,29.99,14.14,3.05,3,4.333,-1.283
+dummyjson:189,Red Shoes,womens-shoes,shoes,34.99,17.69,3.25,3,4.667,-1.417
+dummyjson:19,Chicken Meat,groceries,other,9.99,13.7,3.19,3,4.0,-0.81
+dummyjson:190,IWC Ingenieur Automatic Steel,womens-watches,watches,4999.99,9.45,2.93,3,3.667,-0.737
+dummyjson:191,Rolex Cellini Moonphase,womens-watches,watches,15999.99,4.11,3.83,3,3.333,0.497
+dummyjson:192,Rolex Datejust Women,womens-watches,watches,10999.99,15.94,2.86,3,4.0,-1.14
+dummyjson:193,Watch Gold for Women,womens-watches,watches,799.99,18.34,4.24,3,4.333,-0.093
+dummyjson:194,Women's Wrist Watch,womens-watches,watches,129.99,12.6,3.52,3,4.667,-1.147
+dummyjson:2,Eyeshadow Palette with Mirror,beauty,other,19.99,18.19,2.86,3,3.333,-0.473
+dummyjson:20,Cooking Oil,groceries,other,4.99,9.33,4.8,3,4.0,0.8
+dummyjson:21,Cucumber,groceries,other,1.49,0.16,4.07,3,3.333,0.737
+dummyjson:22,Dog Food,groceries,other,10.99,10.27,4.55,3,4.667,-0.117
+dummyjson:23,Eggs,groceries,other,2.99,11.05,2.53,3,3.333,-0.803
+dummyjson:24,Fish Steak,groceries,other,14.99,4.23,3.78,3,3.667,0.113
+dummyjson:25,Green Bell Pepper,groceries,other,1.29,0.16,3.25,3,4.0,-0.75
+dummyjson:26,Green Chili Pepper,groceries,other,0.99,1.0,3.66,3,2.667,0.993
+dummyjson:27,Honey Jar,groceries,other,6.99,14.4,3.97,3,2.333,1.637
+dummyjson:28,Ice Cream,groceries,other,5.49,8.69,3.39,3,4.667,-1.277
+dummyjson:29,Juice,groceries,other,3.99,12.06,3.94,3,4.667,-0.727
+dummyjson:3,Powder Canister,beauty,other,14.99,9.84,4.64,3,3.333,1.307
+dummyjson:30,Kiwi,groceries,other,2.49,15.22,4.93,3,3.333,1.597
+dummyjson:31,Lemon,groceries,other,0.79,9.7,3.53,3,5.0,-1.47
+dummyjson:32,Milk,groceries,other,3.49,13.74,2.61,3,4.0,-1.39
+dummyjson:33,Mulberry,groceries,other,4.99,12.87,4.95,3,2.667,2.283
+dummyjson:34,Nescafe Coffee,groceries,other,7.99,1.59,4.82,3,4.667,0.153
+dummyjson:35,Potatoes,groceries,other,2.29,5.38,4.81,3,4.667,0.143
+dummyjson:36,Protein Powder,groceries,other,19.99,7.59,4.18,3,3.667,0.513
+dummyjson:37,Red Onions,groceries,other,1.99,9.9,4.2,3,4.0,0.2
+dummyjson:38,Rice,groceries,other,5.99,9.29,3.18,3,3.333,-0.153
+dummyjson:39,Soft Drinks,groceries,other,1.99,17.48,4.75,3,3.0,1.75
+dummyjson:4,Red Lipstick,beauty,other,12.99,12.16,4.36,3,4.667,-0.307
+dummyjson:40,Strawberry,groceries,other,3.99,1.12,3.08,3,3.333,-0.253
+dummyjson:41,Tissue Paper Box,groceries,other,2.49,13.28,2.69,3,3.667,-0.977
+dummyjson:42,Water,groceries,other,0.99,14.92,4.96,3,3.333,1.627
+dummyjson:43,Decoration Swing,home-decoration,other,59.99,10.41,3.16,3,2.0,1.16
+dummyjson:44,Family Tree Photo Frame,home-decoration,other,29.99,14.87,4.53,3,3.667,0.863
+dummyjson:45,House Showpiece Plant,home-decoration,other,39.99,7.46,4.67,3,3.667,1.003
+dummyjson:46,Plant Pot,home-decoration,other,14.99,6.84,3.01,3,4.0,-0.99
+dummyjson:47,Table Lamp,home-decoration,other,49.99,7.09,3.55,3,4.333,-0.783
+dummyjson:48,Bamboo Spatula,kitchen-accessories,other,7.99,2.84,3.27,3,4.667,-1.397
+dummyjson:49,Black Aluminium Cup,kitchen-accessories,other,5.99,15.65,4.46,3,3.0,1.46
+dummyjson:5,Red Nail Polish,beauty,other,8.99,11.44,4.32,3,2.667,1.653
+dummyjson:50,Black Whisk,kitchen-accessories,other,9.99,10.24,3.9,3,3.0,0.9
+dummyjson:51,Boxed Blender,kitchen-accessories,other,39.99,7.26,4.56,3,5.0,-0.44
+dummyjson:52,Carbon Steel Wok,kitchen-accessories,other,29.99,6.53,4.05,3,4.333,-0.283
+dummyjson:53,Chopping Board,kitchen-accessories,other,12.99,8.03,3.7,3,4.333,-0.633
+dummyjson:54,Citrus Squeezer Yellow,kitchen-accessories,other,8.99,12.1,4.63,3,4.333,0.297
+dummyjson:55,Egg Slicer,kitchen-accessories,other,6.99,14.76,3.09,3,2.667,0.423
+dummyjson:56,Electric Stove,kitchen-accessories,other,49.99,14.04,4.11,3,2.333,1.777
+dummyjson:57,Fine Mesh Strainer,kitchen-accessories,other,9.99,3.5,3.04,3,3.667,-0.627
+dummyjson:58,Fork,kitchen-accessories,other,3.99,8.07,3.11,3,4.0,-0.89
+dummyjson:59,Glass,kitchen-accessories,other,4.99,7.92,4.02,3,4.333,-0.313
+dummyjson:6,Calvin Klein CK One,fragrances,other,49.99,1.89,4.37,3,3.0,1.37
+dummyjson:60,Grater Black,kitchen-accessories,other,10.99,3.56,3.21,3,2.333,0.877
+dummyjson:61,Hand Blender,kitchen-accessories,other,34.99,17.02,3.86,3,3.333,0.527
+dummyjson:62,Ice Cube Tray,kitchen-accessories,other,5.99,0.63,4.71,3,5.0,-0.29
+dummyjson:63,Kitchen Sieve,kitchen-accessories,other,7.99,18.91,3.09,3,4.667,-1.577
+dummyjson:64,Knife,kitchen-accessories,other,14.99,18.86,3.26,3,4.0,-0.74
+dummyjson:65,Lunch Box,kitchen-accessories,other,12.99,10.34,4.93,3,4.0,0.93
+dummyjson:66,Microwave Oven,kitchen-accessories,other,89.99,12.13,4.82,3,3.0,1.82
+dummyjson:67,Mug Tree Stand,kitchen-accessories,other,15.99,9.25,2.64,3,3.333,-0.693
+dummyjson:68,Pan,kitchen-accessories,other,24.99,3.0,2.79,3,3.333,-0.543
+dummyjson:69,Plate,kitchen-accessories,other,3.99,7.31,3.65,3,3.667,-0.017
+dummyjson:7,Chanel Coco Noir Eau De,fragrances,other,129.99,16.51,4.26,3,4.667,-0.407
+dummyjson:70,Red Tongs,kitchen-accessories,other,6.99,14.52,4.42,3,4.333,0.087
+dummyjson:71,Silver Pot With Glass Cap,kitchen-accessories,other,39.99,5.7,3.22,3,3.0,0.22
+dummyjson:72,Slotted Turner,kitchen-accessories,other,8.99,13.35,3.4,3,2.667,0.733
+dummyjson:73,Spice Rack,kitchen-accessories,other,19.99,12.09,4.87,3,3.667,1.203
+dummyjson:74,Spoon,kitchen-accessories,other,4.99,1.53,4.03,3,2.667,1.363
+dummyjson:75,Tray,kitchen-accessories,other,16.99,7.48,4.62,3,4.0,0.62
+dummyjson:76,Wooden Rolling Pin,kitchen-accessories,other,11.99,9.75,2.92,3,3.333,-0.413
+dummyjson:77,Yellow Peeler,kitchen-accessories,other,5.99,12.48,4.24,3,3.333,0.907
+dummyjson:78,Apple MacBook Pro 14 Inch Space Grey,laptops,other,1999.99,4.69,3.65,3,4.667,-1.017
+dummyjson:79,Asus Zenbook Pro Dual Screen Laptop,laptops,other,1799.99,11.14,3.95,3,4.333,-0.383
+dummyjson:8,Dior J'adore,fragrances,other,89.99,14.72,3.8,3,4.333,-0.533
+dummyjson:80,Huawei Matebook X Pro,laptops,other,1399.99,9.38,4.98,3,3.0,1.98
+dummyjson:81,Lenovo Yoga 920,laptops,other,1099.99,6.55,2.86,3,4.333,-1.473
+dummyjson:82,New DELL XPS 13 9300 Laptop,laptops,other,1499.99,11.89,2.67,3,3.0,-0.33
+dummyjson:83,Blue & Black Check Shirt,mens-shirts,tops,29.99,15.35,3.64,3,3.333,0.307
+dummyjson:84,Gigabyte Aorus Men Tshirt,mens-shirts,tops,24.99,0.94,3.18,3,3.667,-0.487
+dummyjson:85,Man Plaid Shirt,mens-shirts,tops,34.99,19.5,3.46,3,3.0,0.46
+dummyjson:86,Man Short Sleeve Shirt,mens-shirts,tops,19.99,6.83,2.9,3,2.667,0.233
+dummyjson:87,Men Check Shirt,mens-shirts,tops,27.99,11.38,2.72,3,3.333,-0.613
+dummyjson:88,Nike Air Jordan 1 Red And Black,mens-shoes,shoes,149.99,4.12,4.77,3,3.333,1.437
+dummyjson:89,Nike Baseball Cleats,mens-shoes,shoes,79.99,18.04,3.88,3,3.333,0.547
+dummyjson:9,Dolce Shine Eau de,fragrances,other,69.99,0.62,3.96,3,4.333,-0.373
+dummyjson:90,Puma Future Rider Trainers,mens-shoes,shoes,89.99,4.2,4.9,3,3.667,1.233
+dummyjson:91,Sports Sneakers Off White & Red,mens-shoes,shoes,119.99,4.97,4.77,3,4.667,0.103
+dummyjson:92,Sports Sneakers Off White Red,mens-shoes,shoes,109.99,0.04,4.69,3,3.333,1.357
+dummyjson:93,Brown Leather Belt Watch,mens-watches,watches,89.99,5.99,4.19,3,3.0,1.19
+dummyjson:94,Longines Master Collection,mens-watches,watches,1499.99,17.24,3.87,3,4.0,-0.13
+dummyjson:95,Rolex Cellini Date Black Dial,mens-watches,watches,8999.99,8.88,4.97,3,2.667,2.303
+dummyjson:96,Rolex Cellini Moonphase,mens-watches,watches,12999.99,17.52,2.58,3,4.0,-1.42
+dummyjson:97,Rolex Datejust,mens-watches,watches,10999.99,3.73,3.66,3,3.667,-0.007
+dummyjson:98,Rolex Submariner Watch,mens-watches,watches,13999.99,5.05,2.69,3,4.667,-1.977
+dummyjson:99,Amazon Echo Plus,mobile-accessories,other,99.99,12.07,4.99,3,3.0,1.99

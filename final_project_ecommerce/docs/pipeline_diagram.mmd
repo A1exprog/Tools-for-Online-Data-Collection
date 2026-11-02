@@ -1,0 +1,36 @@
+flowchart LR
+    subgraph SRC[Источники]
+        H["scrapingcourse.com/ecommerce<br/>HTML, WooCommerce<br/>~12 стр. листинга + ~188 карточек"]
+        A["dummyjson.com/products<br/>REST API, JSON<br/>limit/skip, 194 товара + отзывы"]
+    end
+
+    subgraph COL[Сбор: PoliteClient]
+        R["robots.txt · Crawl-delay<br/>лимит на домен + джиттер<br/>User-Agent с контактом"]
+        C["ETag / If-None-Match → 304<br/>sha256 страницы · sitemap lastmod<br/>водяные знаки · gzip"]
+        E["429/5xx/таймаут → повтор<br/>Retry-After важнее backoff<br/>circuit breaker на домен"]
+    end
+
+    RAW[("raw/*.jsonl<br/>только дозапись<br/>+ html_snapshots")]
+    CL["clean.py + contract.py<br/>pydantic, 8 валидаторов<br/>группы товаров (связь)"]
+    REJ[("clean/rejects.jsonl")]
+    CLEAN[("clean/products.parquet<br/>clean/reviews.parquet")]
+    Q{"quality.py<br/>11 метрик<br/>GREEN / YELLOW / RED"}
+    DB[("SQLite warehouse.db<br/>UPSERT по бизнес-ключу<br/>product_history, runs")]
+    MART[("mart/*.csv, *.parquet<br/>представления v_*")]
+    NB["analysis.ipynb<br/>выводы, графики"]
+    OBS["logs/run_*.jsonl<br/>reports/run_report_*.json<br/>alerts_*.json, incidents.jsonl"]
+    N8N["n8n: Schedule Trigger 06:00<br/>→ Execute Command → IF<br/>→ Telegram"]
+    STOP["exit 3: публикация<br/>заблокирована"]
+
+    H --> R
+    A --> R
+    R --> C --> E --> RAW
+    RAW --> CL
+    CL --> REJ
+    CL --> CLEAN --> Q
+    Q -- "GREEN / YELLOW" --> DB --> MART --> NB
+    Q -- RED --> STOP
+    COL -.-> OBS
+    Q -.-> OBS
+    N8N -. запуск .-> COL
+    OBS -. отчёт .-> N8N

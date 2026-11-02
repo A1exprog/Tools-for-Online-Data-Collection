@@ -1,0 +1,18 @@
+{
+  "run_id": "20261027T172634Z_32d530",
+  "steps": {
+    "html_listing_records": 188,
+    "html_enriched_with_detail": 188,
+    "html_stock_from_variations": 144,
+    "html_group_unmapped": 3,
+    "api_product_records": 194,
+    "api_review_records": 582,
+    "clean_products": 382,
+    "clean_reviews": 582
+  },
+  "rejected": 0,
+  "reject_reasons": {},
+  "keys_in_run": 0,
+  "duplicates_in_run": 0,
+  "duplicate_key_pct": 0.0
+}

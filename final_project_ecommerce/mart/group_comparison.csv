@@ -1,0 +1,15 @@
+product_group,title_ru,source,n_products,avg_price,min_price,max_price,avg_discount_pct,in_stock_pct
+bags,Сумки и рюкзаки,dummyjson.com,5,175.99,39.99,599.99,12.53,100.0
+bags,Сумки и рюкзаки,scrapingcourse.com,10,40.7,24.0,74.0,2.5,100.0
+bottoms,"Низ: брюки, шорты, леггинсы",scrapingcourse.com,32,44.39,20.0,75.0,0.0,100.0
+dresses,Платья,dummyjson.com,5,105.99,49.99,179.99,15.7,100.0
+fitness,Спорт и фитнес-аксессуары,dummyjson.com,17,24.11,5.99,49.99,9.31,94.1
+fitness,Спорт и фитнес-аксессуары,scrapingcourse.com,57,38.95,5.0,92.0,0.0,100.0
+other,Прочее / нет пары в другом источнике,dummyjson.com,136,1619.17,0.79,36999.99,10.44,98.5
+other,Прочее / нет пары в другом источнике,scrapingcourse.com,3,54.66,32.0,75.0,0.0,100.0
+outerwear,Верхняя одежда: куртки,scrapingcourse.com,12,59.42,42.0,99.0,0.0,100.0
+shoes,Обувь,dummyjson.com,10,76.49,19.99,149.99,8.37,100.0
+tops,"Верх: футболки, худи, майки, рубашки",dummyjson.com,10,28.79,19.99,39.99,12.6,100.0
+tops,"Верх: футболки, худи, майки, рубашки",scrapingcourse.com,69,39.95,18.0,77.0,0.0,100.0
+watches,Часы,dummyjson.com,11,7410.9,89.99,15999.99,10.8,90.9
+watches,Часы,scrapingcourse.com,5,48.0,43.0,54.0,0.0,100.0
