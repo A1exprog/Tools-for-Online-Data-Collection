@@ -1,0 +1,131 @@
+{
+  "runs": [
+    {
+      "run_at": "2026-11-02T15:33:45.746444+00:00",
+      "label": "1. исходный",
+      "rows_in": 750,
+      "inserted": 750,
+      "updated": 0,
+      "unchanged": 0,
+      "rows_total": 750,
+      "history_versions": 750
+    },
+    {
+      "run_at": "2026-11-02T15:33:45.769492+00:00",
+      "label": "2. повторный, те же данные",
+      "rows_in": 750,
+      "inserted": 0,
+      "updated": 0,
+      "unchanged": 750,
+      "rows_total": 750,
+      "history_versions": 750
+    },
+    {
+      "run_at": "2026-11-02T15:33:45.778388+00:00",
+      "label": "3. изменены две записи",
+      "rows_in": 750,
+      "inserted": 0,
+      "updated": 2,
+      "unchanged": 748,
+      "rows_total": 750,
+      "history_versions": 752
+    }
+  ],
+  "run2_rows_with_same_updated_at": 750,
+  "changed_keys": [
+    "abakan_2026-09-27",
+    "armavir_2026-10-12"
+  ],
+  "history_of_changed": [
+    {
+      "observation_id": "abakan_2026-09-27",
+      "valid_from": "2026-11-02T15:33:45.746444+00:00",
+      "valid_to": "2026-11-02T15:33:45.778388+00:00",
+      "is_current": 0,
+      "temperature_2m_max": 9.64,
+      "temperature_2m_min": 2.55,
+      "precipitation_sum": 2.65,
+      "collected_at": "2026-11-02T14:55:59+00:00"
+    },
+    {
+      "observation_id": "abakan_2026-09-27",
+      "valid_from": "2026-11-02T15:33:45.778388+00:00",
+      "valid_to": null,
+      "is_current": 1,
+      "temperature_2m_max": 11.1,
+      "temperature_2m_min": 2.55,
+      "precipitation_sum": 2.65,
+      "collected_at": "2026-11-02T14:55:59+00:00"
+    },
+    {
+      "observation_id": "armavir_2026-10-12",
+      "valid_from": "2026-11-02T15:33:45.746444+00:00",
+      "valid_to": "2026-11-02T15:33:45.778388+00:00",
+      "is_current": 0,
+      "temperature_2m_max": 25.8,
+      "temperature_2m_min": 12.02,
+      "precipitation_sum": 0.0,
+      "collected_at": "2026-11-02T14:56:21+00:00"
+    },
+    {
+      "observation_id": "armavir_2026-10-12",
+      "valid_from": "2026-11-02T15:33:45.778388+00:00",
+      "valid_to": null,
+      "is_current": 1,
+      "temperature_2m_max": 25.8,
+      "temperature_2m_min": 12.02,
+      "precipitation_sum": 2.4,
+      "collected_at": "2026-11-02T14:56:21+00:00"
+    }
+  ],
+  "scd2_state_as_of_run2": {
+    "as_of": "2026-11-02T15:33:45.769492+00:00",
+    "then": [
+      "abakan_2026-09-27",
+      9.64,
+      2.65
+    ],
+    "now": [
+      "abakan_2026-09-27",
+      11.1,
+      2.65
+    ]
+  },
+  "constraint_checks": [
+    {
+      "проверка": "дубликат первичного ключа (обычный INSERT)",
+      "результат": "отвергнуто",
+      "сообщение БД": "UNIQUE constraint failed: observations.observation_id"
+    },
+    {
+      "проверка": "CHECK: tmax < tmin",
+      "результат": "отвергнуто",
+      "сообщение БД": "CHECK constraint failed: temperature_2m_max >= temperature_2m_min"
+    },
+    {
+      "проверка": "CHECK: осадки < 0",
+      "результат": "отвергнуто",
+      "сообщение БД": "CHECK constraint failed: precipitation_sum IS NULL OR precipitation_sum BETWEEN 0 AND 500"
+    },
+    {
+      "проверка": "CHECK: дата без таймзоны",
+      "результат": "отвергнуто",
+      "сообщение БД": "CHECK constraint failed: observation_time_utc LIKE '%+00:00'"
+    },
+    {
+      "проверка": "NOT NULL: нет температуры",
+      "результат": "отвергнуто",
+      "сообщение БД": "NOT NULL constraint failed: observations.temperature_2m_max"
+    },
+    {
+      "проверка": "FOREIGN KEY: неизвестная локация",
+      "результат": "отвергнуто",
+      "сообщение БД": "FOREIGN KEY constraint failed"
+    },
+    {
+      "проверка": "UNIQUE: второй замер того же города за те же сутки",
+      "результат": "отвергнуто",
+      "сообщение БД": "UNIQUE constraint failed: observations.location_id, observations.observation_time_utc"
+    }
+  ]
+}

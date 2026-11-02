@@ -1,0 +1,11 @@
+metric,value,green,yellow,status,note
+completeness_required,100.0,≥ 99.0,≥ 95.0,green,8 обязательных полей
+completeness_optional,100.0,≥ 95.0,≥ 80.0,green,precipitation_sum (NULL не заполняется)
+key_uniqueness,100.0,≥ 100.0,≥ 99.5,green,observation_id
+validity,93.4,≥ 95.0,≥ 85.0,yellow,"750 чистых из 803 сырых (реальных 750, синтетических 53)"
+reject_rate,6.6,≤ 5.0,≤ 15.0,yellow,6. Бизнес-правила: 20; 5. Дубликаты: 19; 3. Типизация: 9; 4. Пропуски: 5
+business_rules_violations,2.6,≤ 1.0,≤ 5.0,yellow,20 из 770 записей на шаге 6
+cross_source_consistency,100.0,≥ 100.0,≥ 98.0,green,"доля наблюдений, чья локация есть в справочнике HTML"
+freshness_days,7.65,≤ 8.0,≤ 11.0,green,"последнее наблюдение 2026-10-26; источник nasa-power публикует данные с задержкой ~7 сут, пороги = задержка + 1 / + 4 сут"
+coverage_city_days,100.0,≥ 98.0,≥ 90.0,green,750 из 750 пар «город × сутки»
+volume_change_pct,0.0,≤ 10.0,≤ 20.0,green,"было 750, стало 750"

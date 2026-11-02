@@ -1,0 +1,709 @@
+{
+  "name": "lab6_weather_load",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 3 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1800,
+        0
+      ],
+      "id": "c6555c06-01bb-4112-b5fa-069942fafb89",
+      "name": "Расписание 03:00"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/files/raw/locations_html*.jsonl",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -1580,
+        0
+      ],
+      "id": "9388034b-2860-4a01-9685-94c30d3bf99d",
+      "name": "Читать raw: локации"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -1380,
+        0
+      ],
+      "id": "7afd105a-84d8-4d84-a9ec-3024c7324cd7",
+      "name": "Текст локаций"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Разбор JSON Lines из всех прочитанных файлов (основной + *_synthetic.jsonl)\nconst out = [];\nfor (const item of $input.all()) {\n  const text = item.json.data || '';\n  for (const line of text.split(/\\r?\\n/)) {\n    const t = line.trim();\n    if (!t) continue;\n    try { out.push({ json: JSON.parse(t) }); } catch (e) { /* битая строка — пропуск */ }\n  }\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1180,
+        0
+      ],
+      "id": "8ad2883e-9f48-4e2c-85e9-9a6b6a4fb180",
+      "name": "JSONL → записи (локации)"
+    },
+    {
+      "parameters": {
+        "jsCode": "function normalizeText(s) {\n  if (s === null || s === undefined) return s;\n  s = String(s).normalize('NFKC').replace(/ /g, ' ').replace(/[​-‍⁠﻿]/g, '');\n  return s.replace(/\\s+/g, ' ').trim();\n}\nconst TR = {а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',\n  п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'kh',ц:'ts',ч:'ch',ш:'sh',щ:'shch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};\nfunction slugify(s) {\n  s = normalizeText(String(s || '')).toLowerCase();\n  s = [...s].map(ch => TR[ch] ?? ch).join('');\n  return s.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');\n}\nfunction stripTracking(u) {\n  u = String(u || '');\n  if (!u.includes('?')) return u;\n  let [base, q] = u.split('?');\n  q = q.split('&').filter(p => !/^(utm_[^=]+|ref|fbclid|gclid|yclid)=/.test(p)).join('&');\n  return q ? `${base}?${q}` : base;\n}\n// NaN между узлами n8n превращается в null, поэтому ошибки типизации копим в _type_errors\nfunction toNum(v, field, errs) {\n  if (v === null || v === undefined || String(v).trim() === '') return null;\n  const n = Number(String(v).trim().replace(',', '.'));\n  if (Number.isFinite(n)) return n;\n  errs.push(`${field}: не число (${JSON.stringify(v)})`);\n  return null;\n}\n\nreturn $input.all().map(({ json: r }) => {\n  const city = normalizeText(r.city_raw);\n  const errs = [];\n  return { json: {\n    location_id: slugify(city), city,\n    latitude: toNum(normalizeText(r.latitude_raw), 'latitude', errs),\n    longitude: toNum(normalizeText(r.longitude_raw), 'longitude', errs),\n    _type_errors: errs,\n    source: r._source, source_url: stripTracking(r._source_url), parser_version: String(r._parser_version),\n    collected_at: r._collected_at, synthetic: r._synthetic_corruption || null,\n  }};\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -980,
+        0
+      ],
+      "id": "ea79b3c7-849c-486d-abd9-29bdb0fc92df",
+      "name": "Нормализация локаций"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "collected_at",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        0
+      ],
+      "id": "ba59077f-5c1b-4067-92f2-20645f187a31",
+      "name": "Сортировка: свежие первыми"
+    },
+    {
+      "parameters": {
+        "operation": "removeDuplicateItems",
+        "compare": "selectedFields",
+        "fieldsToCompare": "location_id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        -580,
+        0
+      ],
+      "id": "c582c846-db5c-488d-bc51-3b0709e0ff6b",
+      "name": "Дедупликация по location_id"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(({ json: r }) => {\n  const errs = [...(r._type_errors || [])];\n  if (!r.city || r.city.length < 2) errs.push('city: пусто или короче 2 символов');\n  if (errs.length === 0 && (r.latitude === null || r.longitude === null)) errs.push('координаты: пропуск');\n  else if (r.latitude !== null && r.longitude !== null) {\n    if (r.latitude < 41 || r.latitude > 82) errs.push('широта вне территории России');\n    if (!((r.longitude >= 19 && r.longitude <= 180) || (r.longitude >= -180 && r.longitude <= -168))) errs.push('долгота вне территории России');\n  }\n  if (r.city && !/^[А-ЯЁ][А-Яа-яЁё\\- .()]+$/.test(r.city)) errs.push('название не кириллицей с заглавной');\n  return { json: { ...r, _valid: errs.length === 0, _reason: errs.join('; ') } };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -380,
+        0
+      ],
+      "id": "ec99dc89-8b6d-4898-9897-c159861ee04e",
+      "name": "Проверка локаций"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e4a861a4-9dc4-4390-ae28-aa596baecdf7",
+              "leftValue": "={{ $json._valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -180,
+        0
+      ],
+      "id": "575d5ca7-bbdb-4260-9a3b-91bee1ee6a70",
+      "name": "Локация валидна?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO locations (location_id, city, latitude, longitude, source, source_url, parser_version, collected_at, updated_at)\nVALUES ($1, $2, $3, $4, $5, $6, $7, $8::timestamptz, now())\nON CONFLICT (location_id) DO UPDATE SET\n  city = EXCLUDED.city, latitude = EXCLUDED.latitude, longitude = EXCLUDED.longitude,\n  source_url = EXCLUDED.source_url, parser_version = EXCLUDED.parser_version,\n  collected_at = EXCLUDED.collected_at, updated_at = now()\nWHERE (locations.city, locations.latitude, locations.longitude)\n      IS DISTINCT FROM (EXCLUDED.city, EXCLUDED.latitude, EXCLUDED.longitude);",
+        "options": {
+          "queryReplacement": "={{ [$json.location_id, $json.city, $json.latitude, $json.longitude, $json.source, $json.source_url, $json.parser_version, $json.collected_at] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        40,
+        -100
+      ],
+      "id": "c959897f-dcac-45f1-a097-0d21b22aa430",
+      "name": "UPSERT locations",
+      "credentials": {
+        "postgres": {
+          "id": "",
+          "name": "Postgres lab6"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO rejects (source, reason, synthetic, payload, created_at)\nVALUES ($1, $2, $3, $4::jsonb, now())\nON CONFLICT (source, payload_hash) DO NOTHING;",
+        "options": {
+          "queryReplacement": "={{ ['time-in.ru', $json._reason, $json.synthetic, JSON.stringify($json)] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        40,
+        100
+      ],
+      "id": "772054ee-850b-4dd8-914d-f80ce0eae149",
+      "name": "Отбраковка локаций → rejects",
+      "credentials": {
+        "postgres": {
+          "id": "",
+          "name": "Postgres lab6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "/files/raw/weather_api*.jsonl",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        260,
+        -100
+      ],
+      "id": "6ad286b4-7d68-4d8f-b65d-b52c8961e39e",
+      "name": "Читать raw: погода",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        460,
+        -100
+      ],
+      "id": "f70fa3c7-ef0b-4697-9996-5911b4c64f2b",
+      "name": "Текст погоды"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Разбор JSON Lines из всех прочитанных файлов (основной + *_synthetic.jsonl)\nconst out = [];\nfor (const item of $input.all()) {\n  const text = item.json.data || '';\n  for (const line of text.split(/\\r?\\n/)) {\n    const t = line.trim();\n    if (!t) continue;\n    try { out.push({ json: JSON.parse(t) }); } catch (e) { /* битая строка — пропуск */ }\n  }\n}\nreturn out;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        -100
+      ],
+      "id": "2ae43c8f-d6ec-4446-8b80-abfdd514fc19",
+      "name": "JSONL → записи (погода)"
+    },
+    {
+      "parameters": {
+        "jsCode": "function normalizeText(s) {\n  if (s === null || s === undefined) return s;\n  s = String(s).normalize('NFKC').replace(/ /g, ' ').replace(/[​-‍⁠﻿]/g, '');\n  return s.replace(/\\s+/g, ' ').trim();\n}\nconst TR = {а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',\n  п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'kh',ц:'ts',ч:'ch',ш:'sh',щ:'shch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};\nfunction slugify(s) {\n  s = normalizeText(String(s || '')).toLowerCase();\n  s = [...s].map(ch => TR[ch] ?? ch).join('');\n  return s.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');\n}\nfunction stripTracking(u) {\n  u = String(u || '');\n  if (!u.includes('?')) return u;\n  let [base, q] = u.split('?');\n  q = q.split('&').filter(p => !/^(utm_[^=]+|ref|fbclid|gclid|yclid)=/.test(p)).join('&');\n  return q ? `${base}?${q}` : base;\n}\n// NaN между узлами n8n превращается в null, поэтому ошибки типизации копим в _type_errors\nfunction toNum(v, field, errs) {\n  if (v === null || v === undefined || String(v).trim() === '') return null;\n  const n = Number(String(v).trim().replace(',', '.'));\n  if (Number.isFinite(n)) return n;\n  errs.push(`${field}: не число (${JSON.stringify(v)})`);\n  return null;\n}\n\nreturn $input.all().map(({ json: r }) => {\n  const city = normalizeText(r.city_raw);\n  const location_id = slugify(city);\n  const errs = [];\n  const d = normalizeText(r.date_raw);\n  const ok = /^\\d{4}-\\d{2}-\\d{2}$/.test(d) && !isNaN(new Date(d + 'T00:00:00Z')) &&\n             new Date(d + 'T00:00:00Z').toISOString().slice(0, 10) === d;   // отсекает 2026-13-45\n  return { json: {\n    observation_id: `${location_id}_${d}`, location_id, city,\n    observation_time_utc: ok ? `${d}T00:00:00+00:00` : null,\n    day_code: ok ? d.slice(5, 7) + d.slice(8, 10) : null,\n    temperature_2m_max: toNum(r.temperature_2m_max_raw, 'temperature_2m_max', errs),\n    temperature_2m_min: toNum(r.temperature_2m_min_raw, 'temperature_2m_min', errs),\n    precipitation_sum: toNum(r.precipitation_sum_raw, 'precipitation_sum', errs),\n    _type_errors: errs,\n    source: r._source, source_url: stripTracking(r._source_url), parser_version: String(r._parser_version),\n    collected_at: r._collected_at, synthetic: r._synthetic_corruption || null,\n  }};\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        860,
+        -100
+      ],
+      "id": "ab16a1d6-e045-4b6e-a2f0-21d106a58fe0",
+      "name": "Нормализация наблюдений"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "collected_at",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        -100
+      ],
+      "id": "443ba5d3-6490-46f2-90ac-5d7cf3d49199",
+      "name": "Сортировка: свежие первыми "
+    },
+    {
+      "parameters": {
+        "operation": "removeDuplicateItems",
+        "compare": "selectedFields",
+        "fieldsToCompare": "observation_id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        -100
+      ],
+      "id": "5eb54d64-1a07-4837-93f0-20395ddb4ec6",
+      "name": "Дедупликация по observation_id"
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = new Date(); today.setUTCHours(0, 0, 0, 0);\nconst num = v => typeof v === 'number' && Number.isFinite(v);\nreturn $input.all().map(({ json: r }) => {\n  const errs = [...(r._type_errors || [])];\n  if (!r.observation_time_utc) errs.push('дата: не распознана');\n  else if (new Date(r.observation_time_utc) > today) errs.push('дата в будущем');\n  for (const f of ['temperature_2m_max', 'temperature_2m_min']) {\n    if (r[f] === null) { if (!errs.some(e => e.startsWith(f))) errs.push(`${f}: пропуск`); }\n    else if (r[f] < -70 || r[f] > 50) errs.push(`${f}: вне [-70; 50]`);\n  }\n  if (num(r.temperature_2m_max) && num(r.temperature_2m_min)) {\n    if (r.temperature_2m_max < r.temperature_2m_min) errs.push('tmax < tmin');\n    if (r.temperature_2m_max - r.temperature_2m_min > 40) errs.push('размах > 40');\n  }\n  if (r.precipitation_sum !== null && (!num(r.precipitation_sum) || r.precipitation_sum < 0 || r.precipitation_sum > 300))\n    errs.push('осадки вне [0; 300]');\n  return { json: { ...r, _valid: errs.length === 0, _reason: errs.join('; ') } };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        -100
+      ],
+      "id": "656b8914-7d2a-4da7-b684-496f3956aa67",
+      "name": "Проверка наблюдений"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fb59c9f8-a402-4b1d-b47d-2a8de803b680",
+              "leftValue": "={{ $json._valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1660,
+        -100
+      ],
+      "id": "eaf7d3ef-1655-4832-8fef-d3a6bbbdb795",
+      "name": "Наблюдение валидно?"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO observations (observation_id, location_id, observation_time_utc, day_code,\n  temperature_2m_max, temperature_2m_min, precipitation_sum, source, source_url, parser_version, collected_at, updated_at)\nVALUES ($1, $2, $3::timestamptz, $4, $5, $6, $7, $8, $9, $10, $11::timestamptz, now())\nON CONFLICT (observation_id) DO UPDATE SET\n  temperature_2m_max = EXCLUDED.temperature_2m_max, temperature_2m_min = EXCLUDED.temperature_2m_min,\n  precipitation_sum = EXCLUDED.precipitation_sum, source_url = EXCLUDED.source_url,\n  parser_version = EXCLUDED.parser_version, collected_at = EXCLUDED.collected_at, updated_at = now()\nWHERE (observations.temperature_2m_max, observations.temperature_2m_min, observations.precipitation_sum)\n      IS DISTINCT FROM (EXCLUDED.temperature_2m_max, EXCLUDED.temperature_2m_min, EXCLUDED.precipitation_sum);",
+        "options": {
+          "queryReplacement": "={{ [$json.observation_id, $json.location_id, $json.observation_time_utc, $json.day_code, $json.temperature_2m_max, $json.temperature_2m_min, $json.precipitation_sum, $json.source, $json.source_url, $json.parser_version, $json.collected_at] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1900,
+        -220
+      ],
+      "id": "9b23358a-dbab-4aba-80b6-8841e3edcc51",
+      "name": "UPSERT observations",
+      "credentials": {
+        "postgres": {
+          "id": "",
+          "name": "Postgres lab6"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO rejects (source, reason, synthetic, payload, created_at)\nVALUES ($1, $2, $3, $4::jsonb, now())\nON CONFLICT (source, payload_hash) DO NOTHING;",
+        "options": {
+          "queryReplacement": "={{ ['open-meteo', $json._reason, $json.synthetic, JSON.stringify($json)] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1900,
+        20
+      ],
+      "id": "405220a1-8227-4d34-ba6f-55de255facf3",
+      "name": "Отбраковка наблюдений → rejects",
+      "credentials": {
+        "postgres": {
+          "id": "",
+          "name": "Postgres lab6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO rejects (source, reason, synthetic, payload, created_at)\nVALUES ($1, $2, $3, $4::jsonb, now())\nON CONFLICT (source, payload_hash) DO NOTHING;",
+        "options": {
+          "queryReplacement": "={{ ['open-meteo', 'БД: ' + ($json.error?.message || 'ошибка'), $json.synthetic ?? null, JSON.stringify($json)] }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2140,
+        -120
+      ],
+      "id": "c56360ec-ae8e-4ee1-9e01-0864d16d84d2",
+      "name": "Отказ БД → rejects",
+      "credentials": {
+        "postgres": {
+          "id": "",
+          "name": "Postgres lab6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "fileName": "nocode_result.csv",
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1900,
+        -380
+      ],
+      "id": "faea17f6-7890-4517-bf3d-9b338cd81ca8",
+      "name": "Валидные → CSV",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/files/nocode/nocode_result.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        2100,
+        -380
+      ],
+      "id": "c05e43ee-c600-4e26-87e0-206df0f0c255",
+      "name": "Сохранить nocode_result.csv"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Расписание 03:00": {
+      "main": [
+        [
+          {
+            "node": "Читать raw: локации",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Читать raw: локации": {
+      "main": [
+        [
+          {
+            "node": "Текст локаций",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Текст локаций": {
+      "main": [
+        [
+          {
+            "node": "JSONL → записи (локации)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSONL → записи (локации)": {
+      "main": [
+        [
+          {
+            "node": "Нормализация локаций",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Нормализация локаций": {
+      "main": [
+        [
+          {
+            "node": "Сортировка: свежие первыми",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сортировка: свежие первыми": {
+      "main": [
+        [
+          {
+            "node": "Дедупликация по location_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Дедупликация по location_id": {
+      "main": [
+        [
+          {
+            "node": "Проверка локаций",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка локаций": {
+      "main": [
+        [
+          {
+            "node": "Локация валидна?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPSERT locations": {
+      "main": [
+        [
+          {
+            "node": "Читать raw: погода",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Читать raw: погода": {
+      "main": [
+        [
+          {
+            "node": "Текст погоды",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Текст погоды": {
+      "main": [
+        [
+          {
+            "node": "JSONL → записи (погода)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSONL → записи (погода)": {
+      "main": [
+        [
+          {
+            "node": "Нормализация наблюдений",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Нормализация наблюдений": {
+      "main": [
+        [
+          {
+            "node": "Сортировка: свежие первыми ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сортировка: свежие первыми ": {
+      "main": [
+        [
+          {
+            "node": "Дедупликация по observation_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Дедупликация по observation_id": {
+      "main": [
+        [
+          {
+            "node": "Проверка наблюдений",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Проверка наблюдений": {
+      "main": [
+        [
+          {
+            "node": "Наблюдение валидно?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Валидные → CSV": {
+      "main": [
+        [
+          {
+            "node": "Сохранить nocode_result.csv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Локация валидна?": {
+      "main": [
+        [
+          {
+            "node": "UPSERT locations",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Отбраковка локаций → rejects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Наблюдение валидно?": {
+      "main": [
+        [
+          {
+            "node": "UPSERT observations",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Валидные → CSV",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Отбраковка наблюдений → rejects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPSERT observations": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Отказ БД → rejects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dee16c51-cbf8-4603-abd1-2b9811f83552",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "fba8271bc50748e8",
+  "tags": []
+}

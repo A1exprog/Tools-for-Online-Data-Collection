@@ -1,0 +1,41 @@
+{
+  "first": {
+    "rebuilt_at": "2026-11-02T15:33:45+00:00",
+    "raw_rows": {
+      "time-in.ru": 1835,
+      "open-meteo": 803
+    },
+    "raw_synthetic": {
+      "time-in.ru": 120,
+      "open-meteo": 53
+    },
+    "clean_rows": {
+      "locations": 340,
+      "observations": 750
+    },
+    "rejects": 1548,
+    "fingerprint_observations": "da8e77598237a3e2",
+    "fingerprint_locations": "75a5e4fa4b557aa1",
+    "seconds": 0.23
+  },
+  "second": {
+    "rebuilt_at": "2026-11-02T15:33:45+00:00",
+    "raw_rows": {
+      "time-in.ru": 1835,
+      "open-meteo": 803
+    },
+    "raw_synthetic": {
+      "time-in.ru": 120,
+      "open-meteo": 53
+    },
+    "clean_rows": {
+      "locations": 340,
+      "observations": 750
+    },
+    "rejects": 1548,
+    "fingerprint_observations": "da8e77598237a3e2",
+    "fingerprint_locations": "75a5e4fa4b557aa1",
+    "seconds": 0.17
+  },
+  "identical": true
+}

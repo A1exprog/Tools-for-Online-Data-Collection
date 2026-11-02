@@ -1,0 +1,28 @@
+# n8n + PostgreSQL для no-code части ЛР6.
+# Запуск из папки nocode:  docker compose up -d   →  http://localhost:5678
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: lab6
+      POSTGRES_PASSWORD: lab6
+      POSTGRES_DB: lab6
+    ports: ["5432:5432"]
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./schema_postgres.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro   # схема создаётся при первом запуске
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    ports: ["5678:5678"]
+    environment:
+      N8N_RESTRICT_FILE_ACCESS_TO: /files
+      GENERIC_TIMEZONE: UTC
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ..:/files            # корень проекта: /files/raw/*.jsonl, /files/nocode/
+    depends_on: [postgres]
+
+volumes:
+  pg_data:
+  n8n_data:

@@ -1,0 +1,4 @@
+format,rows,size_kb,read_full_ms,read_3_cols_ms,observation_time_utc_dtype,day_code_dtype,day_code_example,date_example,precipitation_sum_dtype
+CSV,750,237.9,3.46,2.91,object,int64,np.int64(927),2026-09-27 00:00:00+00:00,float64
+JSON Lines,750,409.1,7.0,7.33,object,int64,np.int64(927),2026-09-27T00:00:00.000Z,float64
+Parquet,750,25.9,1.71,1.26,"datetime64[ns, UTC]",object,'0927',2026-09-27 00:00:00+00:00,Float64

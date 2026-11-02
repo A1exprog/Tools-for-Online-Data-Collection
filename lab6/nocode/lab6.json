@@ -1,0 +1,528 @@
+{
+  "name": "lab6",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 3 * * *"
+            }
+          ]
+        }
+      },
+      "id": "1bb04abc-545a-4a09-9ca1-ad859afebf8e",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2784,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "/files/raw/weather_api.jsonl",
+        "options": {}
+      },
+      "id": "2c428ab5-e4ef-4cc2-8800-88a10a9b3e25",
+      "name": "Read Weather",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -2544,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "/files/raw/locations_html.jsonl",
+        "options": {}
+      },
+      "id": "619634c6-8196-471e-972c-5150d15f0475",
+      "name": "Read Locations",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -2544,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "f1308a72-5085-4d40-bf83-2239ff076879",
+      "name": "Text Weather",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -2320,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "3a7f1463-ec35-4cf5-8f7d-b4810057c893",
+      "name": "Text Locations",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -2336,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = items[0].json.data || '';\nconst out = [];\nfor (const line of text.split(/\\r?\\n/)) {\n  const t = line.trim();\n  if (!t) continue;\n  try {\n    const r = JSON.parse(t);\n    r._kind = 'weather';\n    out.push({ json: r });\n  } catch (e) {}\n}\nreturn out;"
+      },
+      "id": "762c7eb4-7f1e-457c-83ef-0d5bb1d3f637",
+      "name": "Parse Weather JSONL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2112,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = items[0].json.data || '';\nconst out = [];\nfor (const line of text.split(/\\r?\\n/)) {\n  const t = line.trim();\n  if (!t) continue;\n  try {\n    const r = JSON.parse(t);\n    r._kind = 'location';\n    out.push({ json: r });\n  } catch (e) {}\n}\nreturn out;"
+      },
+      "id": "cb44e830-910f-4c11-8149-9fa310570938",
+      "name": "Parse Locations JSONL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2112,
+        1088
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "40642789-d1db-474d-8423-81294ff83da3",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -1872,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "function normalizeText(s){\n  if (s === null || s === undefined) return s;\n  s = String(s).normalize('NFKC');\n  s = s.replace(/\\u00A0/g,' ').replace(/[\\u200B-\\u200D\\uFEFF]/g,'');\n  return s.replace(/\\s+/g,' ').trim();\n}\nfunction slugify(s){\n  return normalizeText(String(s||'')).toLowerCase()\n    .replace(/[^a-z0-9а-яё]+/gi,'_')\n    .replace(/^_+|_+$/g,'');\n}\nfunction stripTracking(u){\n  return String(u||'').replace(/[?&](utm_[^&]+|ref=[^&]+)/g,'');\n}\nfunction toNum(v){\n  if (v === null || v === undefined || v === '') return null;\n  const n = Number(String(v).replace(',', '.'));\n  return Number.isFinite(n) ? n : null;\n}\nconst out = [];\nfor (const item of items){\n  const r = item.json;\n  const kind = r._kind;\n  if (kind === 'location'){\n    const city = normalizeText(r.city_raw);\n    const lat = toNum(r.latitude_raw);\n    const lon = toNum(r.longitude_raw);\n    out.push({ json: {\n      _kind: 'location',\n      location_id: slugify(city),\n      city, latitude: lat, longitude: lon,\n      source: normalizeText(r._source || 'time-in.ru'),\n      source_url: stripTracking(r._source_url),\n      parser_version: String(r._parser_version || '1.0'),\n      collected_at: r._collected_at\n    }});\n  } else if (kind === 'weather'){\n    const city = normalizeText(r.city_raw);\n    const location_id = slugify(city);\n    const rawTime = normalizeText(r.date_raw);\n    const dt = new Date(rawTime);\n    const observation_time_utc = isNaN(dt.getTime()) ? null : dt.toISOString();\n    const day = observation_time_utc ? observation_time_utc.slice(0,10) : 'invalid';\n    out.push({ json: {\n      _kind: 'weather',\n      observation_id: location_id + '_' + day,\n      location_id,\n      city,\n      latitude: toNum(r.latitude_raw),\n      longitude: toNum(r.longitude_raw),\n      observation_time_utc,\n      temperature_2m_max: toNum(r.temperature_2m_max_raw),\n      temperature_2m_min: toNum(r.temperature_2m_min_raw),\n      precipitation_sum: toNum(r.precipitation_sum_raw),\n      source: normalizeText(r._source || 'open_meteo'),\n      source_url: stripTracking(r._source_url),\n      parser_version: String(r._parser_version || '1.0'),\n      collected_at: r._collected_at\n    }});\n  }\n}\nreturn out;"
+      },
+      "id": "05cd4e20-b127-48d2-9fd4-090dbea019f5",
+      "name": "Normalize & Build Keys",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1632,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json._kind }}",
+              "rightValue": "weather",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "9874231b-6f41-4b63-89ce-48969fd8b8df",
+      "name": "IF Weather",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1392,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "removeDuplicateItems"
+      },
+      "id": "0b68217c-176e-411c-a574-f10df6bfec77",
+      "name": "Dedup Observations",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        -1152,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const out = [];\nfor (const item of items){\n  const r = item.json;\n  const errs = [];\n  if (!r.observation_id || r.observation_id.indexOf('_') === -1) errs.push('bad observation_id');\n  if (typeof r.latitude !== 'number' || r.latitude < -90 || r.latitude > 90) errs.push('latitude out of range');\n  if (typeof r.longitude !== 'number' || r.longitude < -180 || r.longitude > 180) errs.push('longitude out of range');\n  if (typeof r.temperature_2m_max !== 'number' || r.temperature_2m_max < -90 || r.temperature_2m_max > 60) errs.push('tmax out of range');\n  if (typeof r.temperature_2m_min !== 'number' || r.temperature_2m_min < -90 || r.temperature_2m_min > 60) errs.push('tmin out of range');\n  if (typeof r.temperature_2m_max === 'number' && typeof r.temperature_2m_min === 'number' && r.temperature_2m_max < r.temperature_2m_min) errs.push('tmax < tmin');\n  if (r.precipitation_sum !== null && (typeof r.precipitation_sum !== 'number' || r.precipitation_sum < 0)) errs.push('precip < 0');\n  if (!r.observation_time_utc) errs.push('bad date');\n  else if (new Date(r.observation_time_utc).getTime() > Date.now()) errs.push('future date');\n  if (!r.city || r.city.length < 2) errs.push('city too short');\n  out.push({ json: Object.assign({}, r, { _valid: errs.length === 0, _reason: errs.join('; ') }) });\n}\nreturn out;"
+      },
+      "id": "0b9f50a9-7717-430f-af63-c52ba700a4ab",
+      "name": "Validate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -928,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "v1",
+              "leftValue": "={{ $json._valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c76219b4-751f-4947-9b36-aa489078b073",
+      "name": "IF Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -704,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO observations (\n  observation_id, location_id, observation_time_utc,\n  temperature_2m_max, temperature_2m_min, precipitation_sum,\n  source, source_url, parser_version, collected_at, updated_at\n) VALUES ($1,$2,$3::timestamptz,$4,$5,$6,$7,$8,$9,$10::timestamptz, NOW())\nON CONFLICT (observation_id) DO UPDATE SET\n  temperature_2m_max = EXCLUDED.temperature_2m_max,\n  temperature_2m_min = EXCLUDED.temperature_2m_min,\n  precipitation_sum  = EXCLUDED.precipitation_sum,\n  source             = EXCLUDED.source,\n  source_url         = EXCLUDED.source_url,\n  parser_version     = EXCLUDED.parser_version,\n  collected_at       = EXCLUDED.collected_at,\n  updated_at         = NOW()\nWHERE observations.temperature_2m_max <> EXCLUDED.temperature_2m_max\n   OR observations.temperature_2m_min <> EXCLUDED.temperature_2m_min\n   OR COALESCE(observations.precipitation_sum, -999) <> COALESCE(EXCLUDED.precipitation_sum, -999)\nRETURNING observation_id, (xmax = 0) AS inserted;",
+        "options": {
+          "queryReplacement": "={{ [\n  $json.observation_id,\n  $json.location_id,\n  $json.observation_time_utc,\n  $json.temperature_2m_max,\n  $json.temperature_2m_min,\n  $json.precipitation_sum,\n  $json.source,\n  $json.source_url,\n  $json.parser_version,\n  $json.collected_at\n] }}"
+        }
+      },
+      "id": "d39e9c29-e110-4fc2-9a81-6cb85bb4e517",
+      "name": "Upsert Observations",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -464,
+        720
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "7Ysswaq3EQpw9hG3",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO rejects (payload, reason, step, created_at)\nVALUES ($1::jsonb, $2, 'contract', NOW())",
+        "options": {
+          "queryReplacement": "={{ JSON.stringify({observation_id: $json.observation_id, city: $json.city, latitude: $json.latitude, longitude: $json.longitude, observation_time_utc: $json.observation_time_utc, temperature_2m_max: $json.temperature_2m_max, temperature_2m_min: $json.temperature_2m_min, precipitation_sum: $json.precipitation_sum}) }}, {{ $json._reason }}"
+        }
+      },
+      "id": "1696aa1a-aa14-4f6c-a97b-22883f3fdfa4",
+      "name": "Insert Rejects",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -464,
+        928
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "7Ysswaq3EQpw9hG3",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "22ce93c6-2cbf-4d3d-9e8c-4c5735d56680",
+      "name": "Dedup Locations",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        -1152,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO locations (\n  location_id, city, latitude, longitude,\n  source, source_url, parser_version, collected_at, updated_at\n) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::timestamptz, NOW())\nON CONFLICT (location_id) DO UPDATE SET\n  city           = EXCLUDED.city,\n  latitude       = EXCLUDED.latitude,\n  longitude      = EXCLUDED.longitude,\n  source         = EXCLUDED.source,\n  source_url     = EXCLUDED.source_url,\n  parser_version = EXCLUDED.parser_version,\n  collected_at   = EXCLUDED.collected_at,\n  updated_at     = NOW()\nWHERE locations.city <> EXCLUDED.city\n   OR locations.latitude <> EXCLUDED.latitude\n   OR locations.longitude <> EXCLUDED.longitude;",
+        "options": {
+          "queryReplacement": "={{ $json.location_id }}, {{ $json.city }}, {{ $json.latitude }}, {{ $json.longitude }}, {{ $json.source }}, {{ $json.source_url }}, {{ $json.parser_version }}, {{ $json.collected_at }}"
+        }
+      },
+      "id": "e868a5ed-63a4-4a8e-be8c-8dfcf4d575bb",
+      "name": "Upsert Locations",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        -928,
+        1088
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "7Ysswaq3EQpw9hG3",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "31149438-7284-42ef-9477-988f4ea497a9",
+      "name": "Done",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        832
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Read Weather",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Locations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Weather": {
+      "main": [
+        [
+          {
+            "node": "Text Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Weather": {
+      "main": [
+        [
+          {
+            "node": "Parse Weather JSONL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Locations": {
+      "main": [
+        [
+          {
+            "node": "Text Locations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Locations": {
+      "main": [
+        [
+          {
+            "node": "Parse Locations JSONL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Weather JSONL": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Locations JSONL": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Normalize & Build Keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize & Build Keys": {
+      "main": [
+        [
+          {
+            "node": "IF Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Weather": {
+      "main": [
+        [
+          {
+            "node": "Dedup Observations",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dedup Locations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup Observations": {
+      "main": [
+        [
+          {
+            "node": "Validate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate": {
+      "main": [
+        [
+          {
+            "node": "IF Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Valid": {
+      "main": [
+        [
+          {
+            "node": "Upsert Observations",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Insert Rejects",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Observations": {
+      "main": [
+        [
+          {
+            "node": "Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Rejects": {
+      "main": [
+        [
+          {
+            "node": "Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup Locations": {
+      "main": [
+        [
+          {
+            "node": "Upsert Locations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f2812da8-d8fe-447f-b935-6327e62d2d86",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "300e9d17519dcf9ad74a16c2f287755b1ba20ac7c961ba6af568e6d0dfe00f26"
+  },
+  "nodeGroups": [],
+  "id": "XE1BCD3wkp1vFc5X",
+  "tags": []
+}
